@@ -9,11 +9,7 @@ interface CreatorProps {
     id: number
     name: string;
     description: string;
-    social_links: {
-        twitter?: string;
-        instagram?: string;
-        facebook?: string;
-    };
+    socials: string[];
 }
 
 const Container = w('div', {
@@ -41,7 +37,7 @@ const SocialLink = w('a', {
 });
 
 const CreatorPage = () => {
-    const {creatorId} = useParams();
+    const { creatorId } = useParams();
     const [creator, setCreator] = useState<CreatorProps | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -60,7 +56,27 @@ const CreatorPage = () => {
         };
 
         fetchCreatorData();
-    }, []);
+    }, [creatorId]);
+
+    const handleDonate = async () => {
+        if (!creatorId) return;
+
+        try {
+            const amount = 5000; // Valor da doação em centavos (R$ 50,00)
+            const response = await axios.post('http://localhost:8000/checkout', {
+                amount,
+                accountId: creatorId,
+            });
+
+            const { url } = response.data;
+            window.location.href = url;
+
+            // Após a conclusão do pagamento, você pode enviar uma requisição para /donate
+            // Isso deve ser feito no backend após a confirmação do pagamento
+        } catch (error) {
+            console.error('Error during donation process:', error);
+        }
+    };
 
     if (loading) {
         return <div>Loading...</div>;
@@ -76,23 +92,24 @@ const CreatorPage = () => {
                 <Title>{creator.name}</Title>
                 <Description>{creator.description}</Description>
                 <SocialLinks>
-                    {creator.social_links.twitter && (
-                        <SocialLink href={creator.social_links.twitter} target="_blank">
-                            Twitter
-                        </SocialLink>
-                    )}
-                    {creator.social_links.instagram && (
-                        <SocialLink href={creator.social_links.instagram} target="_blank">
-                            Instagram
-                        </SocialLink>
-                    )}
-                    {creator.social_links.facebook && (
-                        <SocialLink href={creator.social_links.facebook} target="_blank">
-                            Facebook
-                        </SocialLink>
-                    )}
+                    {creator.socials.map((social) => {
+                        let platformName = 'Social';
+                        if (social.includes('x.com')) {
+                            platformName = 'X';
+                        } else if (social.includes('instagram.com')) {
+                            platformName = 'Instagram';
+                        } else if (social.includes('youtube.com')) {
+                            platformName = 'YouTube';
+                        }
+                        const formattedSocial = social.startsWith('http') ? social : `https://${social}`;
+                        return (
+                            <SocialLink key={social} href={formattedSocial} target="_blank">
+                                {platformName}
+                            </SocialLink>
+                        );
+                    })}
                 </SocialLinks>
-                <Button className="mt-4">Support</Button>
+                <Button className="mt-4" onClick={handleDonate}>Support</Button>
             </Card>
         </Container>
     );
