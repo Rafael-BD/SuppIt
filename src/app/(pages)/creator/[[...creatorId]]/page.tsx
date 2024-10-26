@@ -4,8 +4,9 @@ import axios from 'axios';
 import { w } from 'windstitch';
 import { Button } from '@/src/components/ui/button';
 import { useParams } from 'next/navigation';
-import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
-import { Label } from '@/src/components/ui/label';
+import { RadioGroup } from '@/src/components/ui/radio-group';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
+import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon } from 'react-icons/fa';
 
 interface CreatorProps {
     id: number;
@@ -14,38 +15,77 @@ interface CreatorProps {
     socials: string[];
 }
 
+interface DonationProps {
+    id: number;
+    donorName: string;
+    amount: number;
+    comment: string;
+}
+
 const Container = w('div', {
-    className: 'flex flex-col items-center justify-center min-h-screen py-2',
+    className: 'flex flex-col items-center justify-center min-h-screen bg-[hsl(var(--background))] pt-0 pb-16',
+});
+
+const TopBar = w('div', {
+    className: 'w-full flex items-center justify-between bg-[hsl(var(--card))] shadow-md p-4 fixed top-0',
+});
+
+const Logo = w('h1', {
+    className: 'text-lg font-bold cursor-pointer text-[hsl(var(--foreground))]',
+});
+
+const Banner = w('div', {
+    className: 'w-full h-40 bg-[hsl(var(--muted))] bg-cover bg-center mt-0',
+});
+
+const Content = w('div', {
+    className: 'flex flex-col md:flex-row w-full max-w-6xl mt-4 space-y-4 md:space-y-0 md:space-x-4 p-4',
 });
 
 const Card = w('div', {
-    className: 'bg-white p-6 rounded-lg shadow-lg max-w-md w-full',
+    className: 'bg-[hsl(var(--primary-foreground))] rounded-xl border border-[hsl(var(--border))] p-6',
+});
+
+const ProfileSection = w('div', {
+    className: 'flex flex-col items-start space-y-4',
+});
+
+const ProfileImage = w('img', {
+    className: 'w-24 rounded-full object-cover border-4 border-[hsl(var(--card))]',
 });
 
 const Title = w('h1', {
-    className: 'text-2xl font-bold mb-4',
+    className: 'text-2xl font-bold mt-1 text-[hsl(var(--foreground))]',
 });
 
 const Description = w('p', {
-    className: 'text-gray-700 mb-4',
+    className: 'text-[hsl(var(--muted-foreground))]',
 });
 
 const SocialLinks = w('div', {
-    className: 'flex space-x-4',
+    className: 'flex space-x-4 mt-6',
 });
 
 const SocialLink = w('a', {
-    className: 'text-blue-500 hover:underline',
+    className: 'text-[hsl(var(--primary))] hover:underline text-2xl',
+});
+
+const DonationItem = w('div', {
+    className: 'border-b border-[hsl(var(--border))] py-2',
 });
 
 const CreatorPage = () => {
     const { creatorId } = useParams();
     const [creator, setCreator] = useState<CreatorProps | null>(null);
     const [loading, setLoading] = useState(true);
-    const [donationAmount, setDonationAmount] = useState(500); // Valor padrão em centavos (R$ 5,00)
+    const [donationAmount, setDonationAmount] = useState(500);
     const [donorName, setDonorName] = useState('');
     const [donorEmail, setDonorEmail] = useState('');
+    const [donorComment, setDonorComment] = useState('');
     const [customSupps, setCustomSupps] = useState<number | null>(null);
+    const [recentDonations, setRecentDonations] = useState<DonationProps[]>([]);
+    const [showAllDonations, setShowAllDonations] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
     useEffect(() => {
         const fetchCreatorData = async () => {
@@ -61,7 +101,26 @@ const CreatorPage = () => {
             }
         };
 
+        const fetchRecentDonations = async () => {
+            if (creatorId) {
+                try {
+                    // TODO: fetch recent donations from API
+                    const response = await axios.get(`http://localhost:8000/donations?creator_id=${creatorId}`);
+                    setRecentDonations(response.data);
+                } catch (error) {
+                    // preenche com dados fake
+                    setRecentDonations([
+                        { id: 1, donorName: 'John Doe', amount: 500, comment: 'Great content!' },
+                        { id: 2, donorName: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
+                        { id: 3, donorName: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
+                    ]);
+                    console.error('Error fetching recent donations:', error);
+                }
+            }
+        };
+
         fetchCreatorData();
+        fetchRecentDonations();
     }, [creatorId]);
 
     const handleDonate = async () => {
@@ -73,6 +132,7 @@ const CreatorPage = () => {
                 accountId: creatorId,
                 donorName,
                 donorEmail,
+                donorComment,
             });
 
             const { url } = response.data;
@@ -84,13 +144,18 @@ const CreatorPage = () => {
 
     const handleSuppChange = (value: number) => {
         setCustomSupps(null);
-        setDonationAmount(value); // Multiplica o valor base de 5 reais (500 centavos)
+        setDonationAmount(value);
     };
 
     const handleCustomSuppsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = Number(e.target.value);
         setCustomSupps(value);
-        setDonationAmount(value * 500); // Multiplica o valor base de 5 reais (500 centavos)
+        setDonationAmount(value * 500);
+    };
+
+    const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+        document.documentElement.classList.toggle('dark', !isDarkMode);
     };
 
     if (loading) {
@@ -101,77 +166,121 @@ const CreatorPage = () => {
         return <div>Creator not found</div>;
     }
 
+    const getSocialIcon = (social: string) => {
+        if (social.includes('x.com')) return <FaTwitter />;
+        if (social.includes('instagram.com')) return <FaInstagram />;
+        if (social.includes('youtube.com')) return <FaYoutube />;
+        return <FaLock />;
+    };
+
     return (
         <Container>
-            <Card>
-                <Title>{creator.name}</Title>
-                <Description>{creator.description}</Description>
-                <SocialLinks>
-                    {creator.socials.map((social) => {
-                        let platformName = 'Social';
-                        if (social.includes('x.com')) {
-                            platformName = 'X';
-                        } else if (social.includes('instagram.com')) {
-                            platformName = 'Instagram';
-                        } else if (social.includes('youtube.com')) {
-                            platformName = 'YouTube';
-                        }
-                        const formattedSocial = social.startsWith('http') ? social : `https://${social}`;
-                        return (
-                            <SocialLink key={social} href={formattedSocial} target="_blank">
-                                {platformName}
-                            </SocialLink>
-                        );
-                    })}
-                </SocialLinks>
-                <RadioGroup className="mb-4" value={donationAmount.toString()} onValueChange={(value) => handleSuppChange(Number(value))}>
-                    {[1, 2, 3, 4, 5].map((supp) => (
-                        <div key={supp} className="flex items-center space-x-2">
-                            <RadioGroupItem
-                                value={(supp * 500).toString()}
-                                id={`supp-${supp}`}
-                                checked={donationAmount === supp * 500}
-                            />
-                            <Label htmlFor={`supp-${supp}`}>{supp}x Supps</Label>
-                        </div>
-                    ))}
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                            value="custom"
-                            id="custom-amount"
-                            checked={customSupps !== null}
-                            onChange={() => setCustomSupps(customSupps)}
-                        />
-                        <Label htmlFor="custom-amount">
-                            <input
-                                type="number"
-                                placeholder="Quantidade personalizada de Supps"
-                                value={customSupps ?? ''}
-                                onChange={handleCustomSuppsChange}
-                                className="p-2 border rounded"
-                            />
-                        </Label>
-                    </div>
-                </RadioGroup>
-                <div className="mb-4">
-                    <span>Valor da doação: R$ {(donationAmount / 100).toFixed(2)}</span>
+            <TopBar>
+                <Logo onClick={() => window.location.href = '/'}>Supp.It</Logo>
+                <div className="flex items-center space-x-4">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="text-lg">...</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => console.log('Share')}>Share</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => console.log('Report')}>Report</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="outline">Login</Button>
+                    <Button variant="ghost" onClick={toggleTheme}>
+                        {!isDarkMode ? <FaSun /> : <FaMoon />}
+                    </Button>
                 </div>
-                <input
-                    type="text"
-                    placeholder="Seu nome"
-                    value={donorName}
-                    onChange={(e) => setDonorName(e.target.value)}
-                    className="mb-4 p-2 border rounded"
-                />
-                <input
-                    type="email"
-                    placeholder="Seu email"
-                    value={donorEmail}
-                    onChange={(e) => setDonorEmail(e.target.value)}
-                    className="mb-4 p-2 border rounded"
-                />
-                <Button className="mt-4" onClick={handleDonate}>Support</Button>
-            </Card>
+            </TopBar>
+
+            <Banner style={{ backgroundImage: 'url(https://via.placeholder.com/600x150)' }} />
+            <Content>
+                <Card className="flex-1 md:flex-[0_0_40%]">
+                    <ProfileSection>
+                        <ProfileImage src="https://via.placeholder.com/150" alt="Creator Profile" />
+                        <div>
+                            <Title>{creator.name}</Title>
+                        </div>
+                        <Description>{creator.description}</Description>
+                    </ProfileSection>
+                    <SocialLinks>
+                        {creator.socials.map((social) => {
+                            const formattedSocial = social.startsWith('http') ? social : `https://${social}`;
+                            return (
+                                <SocialLink key={social} href={formattedSocial} target="_blank">
+                                    {getSocialIcon(social)}
+                                </SocialLink>
+                            );
+                        })}
+                    </SocialLinks>
+                    <hr className="my-4 border-[hsl(var(--border))]" />
+                    <div className="mt-4">
+                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Recent Donations</h2>
+                        {recentDonations.slice(0, showAllDonations ? recentDonations.length : 5).map((donation) => (
+                            <DonationItem key={donation.id}>
+                                <p><strong>{donation.donorName}</strong> donated R$ {(donation.amount / 100).toFixed(2)}</p>
+                                <p>{donation.comment}</p>
+                            </DonationItem>
+                        ))}
+                        {recentDonations.length > 5 && (
+                            <Button variant="outline" onClick={() => setShowAllDonations(!showAllDonations)}>
+                                {showAllDonations ? 'Show Less' : 'Show More'}
+                            </Button>
+                        )}
+                    </div>
+                </Card>
+
+                <Card className="flex-1 md:flex-[0_0_60%]">
+                    <h2 className="font-semibold text-lg mb-4 text-[hsl(var(--foreground))]">Support {creator.name}</h2>
+                    <div className="mb-4">
+                        <RadioGroup className="flex flex-wrap space-x-2" value={donationAmount.toString()} onValueChange={(value) => handleSuppChange(Number(value))}>
+                            {[1, 2, 3].map((supp) => (
+                                <Button
+                                    key={supp}
+                                    variant={donationAmount === supp * 500 ? 'default' : 'outline'}
+                                    onClick={() => handleSuppChange(supp * 500)}
+                                    className="p-4 flex-1"
+                                >
+                                    {supp}x Supps (R$ {(supp * 500 / 100).toFixed(2)})
+                                </Button>
+                            ))}
+                            <div className="flex items-center space-x-2 flex-1">
+                                <input
+                                    type="number"
+                                    placeholder="Custom"
+                                    value={customSupps ?? ''}
+                                    onChange={handleCustomSuppsChange}
+                                    className="p-2 border rounded bg-[hsl(var(--input))] text-[hsl(var(--foreground))] text-sm w-full"
+                                />
+                            </div>
+                        </RadioGroup>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Your Name"
+                        value={donorName}
+                        onChange={(e) => setDonorName(e.target.value)}
+                        className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                    />
+                    <input
+                        type="email"
+                        placeholder="Your Email"
+                        value={donorEmail}
+                        onChange={(e) => setDonorEmail(e.target.value)}
+                        className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                    />
+                    <textarea
+                        placeholder="Your Comment"
+                        value={donorComment}
+                        onChange={(e) => setDonorComment(e.target.value)}
+                        className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                    />
+                    <Button className="mt-4 w-full" onClick={handleDonate}>
+                        Donate R$ {(donationAmount / 100).toFixed(2)}
+                    </Button>
+                </Card>
+            </Content>
         </Container>
     );
 };
