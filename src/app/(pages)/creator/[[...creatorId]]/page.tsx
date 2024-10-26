@@ -4,9 +4,11 @@ import axios from 'axios';
 import { w } from 'windstitch';
 import { Button } from '@/src/components/ui/button';
 import { useParams } from 'next/navigation';
+import { RadioGroup, RadioGroupItem } from '@/src/components/ui/radio-group';
+import { Label } from '@/src/components/ui/label';
 
 interface CreatorProps {
-    id: number
+    id: number;
     name: string;
     description: string;
     socials: string[];
@@ -40,6 +42,10 @@ const CreatorPage = () => {
     const { creatorId } = useParams();
     const [creator, setCreator] = useState<CreatorProps | null>(null);
     const [loading, setLoading] = useState(true);
+    const [donationAmount, setDonationAmount] = useState(500); // Valor padrão em centavos (R$ 5,00)
+    const [donorName, setDonorName] = useState('');
+    const [donorEmail, setDonorEmail] = useState('');
+    const [customSupps, setCustomSupps] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchCreatorData = async () => {
@@ -59,23 +65,32 @@ const CreatorPage = () => {
     }, [creatorId]);
 
     const handleDonate = async () => {
-        if (!creatorId) return;
+        if (!creatorId || !donorName || !donorEmail) return;
 
         try {
-            const amount = 5000; // Valor da doação em centavos (R$ 50,00)
             const response = await axios.post('http://localhost:8000/checkout', {
-                amount,
+                amount: donationAmount,
                 accountId: creatorId,
+                donorName,
+                donorEmail,
             });
 
             const { url } = response.data;
             window.location.href = url;
-
-            // Após a conclusão do pagamento, você pode enviar uma requisição para /donate
-            // Isso deve ser feito no backend após a confirmação do pagamento
         } catch (error) {
             console.error('Error during donation process:', error);
         }
+    };
+
+    const handleSuppChange = (value: number) => {
+        setCustomSupps(null);
+        setDonationAmount(value); // Multiplica o valor base de 5 reais (500 centavos)
+    };
+
+    const handleCustomSuppsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = Number(e.target.value);
+        setCustomSupps(value);
+        setDonationAmount(value * 500); // Multiplica o valor base de 5 reais (500 centavos)
     };
 
     if (loading) {
@@ -109,6 +124,52 @@ const CreatorPage = () => {
                         );
                     })}
                 </SocialLinks>
+                <RadioGroup className="mb-4" value={donationAmount.toString()} onValueChange={(value) => handleSuppChange(Number(value))}>
+                    {[1, 2, 3, 4, 5].map((supp) => (
+                        <div key={supp} className="flex items-center space-x-2">
+                            <RadioGroupItem
+                                value={(supp * 500).toString()}
+                                id={`supp-${supp}`}
+                                checked={donationAmount === supp * 500}
+                            />
+                            <Label htmlFor={`supp-${supp}`}>{supp}x Supps</Label>
+                        </div>
+                    ))}
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                            value="custom"
+                            id="custom-amount"
+                            checked={customSupps !== null}
+                            onChange={() => setCustomSupps(customSupps)}
+                        />
+                        <Label htmlFor="custom-amount">
+                            <input
+                                type="number"
+                                placeholder="Quantidade personalizada de Supps"
+                                value={customSupps ?? ''}
+                                onChange={handleCustomSuppsChange}
+                                className="p-2 border rounded"
+                            />
+                        </Label>
+                    </div>
+                </RadioGroup>
+                <div className="mb-4">
+                    <span>Valor da doação: R$ {(donationAmount / 100).toFixed(2)}</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Seu nome"
+                    value={donorName}
+                    onChange={(e) => setDonorName(e.target.value)}
+                    className="mb-4 p-2 border rounded"
+                />
+                <input
+                    type="email"
+                    placeholder="Seu email"
+                    value={donorEmail}
+                    onChange={(e) => setDonorEmail(e.target.value)}
+                    className="mb-4 p-2 border rounded"
+                />
                 <Button className="mt-4" onClick={handleDonate}>Support</Button>
             </Card>
         </Container>
