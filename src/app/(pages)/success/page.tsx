@@ -14,11 +14,13 @@ const StyledCard = w(Card, {
 
 const SuccessPage = () => {
     const searchParams = useSearchParams();
-    const accountId = searchParams.get('creator_id');
+    const accountUser = searchParams.get('creator_user');
     const amount = searchParams.get('amount');
     const status = searchParams.get('status');
     const donorName = searchParams.get('donorName');
     const donorEmail = searchParams.get('donorEmail');
+    const sessionId = searchParams.get('sessionId');
+    const comment = searchParams.get('comment');
 
     if (status !== 'success') {
         return <div>Invalid status</div>;
@@ -33,10 +35,12 @@ const SuccessPage = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        creator_id: accountId,
+                        creator_user: accountUser,
                         amount: Number(amount),
                         donorName,
                         donorEmail,
+                        sessionId,
+                        comment,
                     }),
                 });
 
@@ -46,16 +50,15 @@ const SuccessPage = () => {
 
                 const text = await response.text();
                 const data = text ? JSON.parse(text) : {};
-                console.log('Donation saved:', data);
             } catch (error) {
                 console.error('Error:', error);
             }
         };
 
-        if (accountId && amount && donorName && donorEmail) {
+        if (accountUser && amount && donorName && donorEmail) {
             sendDonation();
         }
-    }, [accountId, amount, donorName, donorEmail]);
+    }, [accountUser, amount, donorName, donorEmail]);
 
     const amountInReais = (Number(amount) / 100).toFixed(2);
 
@@ -67,7 +70,7 @@ const SuccessPage = () => {
                 </CardHeader>
                 <CardContent>
                     <p>Thank you for your donation!</p>
-                    <p>Creator ID: {accountId}</p>
+                    <p>Creator User: {accountUser}</p>
                     <p>Amount: R$ {amountInReais}</p>
                     <p>Donor Name: {donorName}</p>
                     <p>Donor Email: {donorEmail}</p>

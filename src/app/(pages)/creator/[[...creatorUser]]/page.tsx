@@ -13,17 +13,19 @@ interface CreatorProps {
     name: string;
     description: string;
     socials: string[];
+    creatorUser: string;
 }
 
 interface DonationProps {
     id: number;
-    donorName: string;
+    donor_name: string;
     amount: number;
     comment: string;
+
 }
 
 const Container = w('div', {
-    className: 'flex flex-col items-center justify-center min-h-screen bg-[hsl(var(--background))] pt-0 pb-16',
+    className: 'flex flex-col items-center justify-start min-h-screen bg-[hsl(var(--background))] pt-0 pb-16',
 });
 
 const TopBar = w('div', {
@@ -35,7 +37,7 @@ const Logo = w('h1', {
 });
 
 const Banner = w('div', {
-    className: 'w-full h-40 bg-[hsl(var(--muted))] bg-cover bg-center mt-0',
+    className: 'w-full h-40 bg-[hsl(var(--muted))] bg-cover bg-center mt-[4rem]',
 });
 
 const Content = w('div', {
@@ -75,7 +77,7 @@ const DonationItem = w('div', {
 });
 
 const CreatorPage = () => {
-    const { creatorId } = useParams();
+    const { creatorUser } = useParams();
     const [creator, setCreator] = useState<CreatorProps | null>(null);
     const [loading, setLoading] = useState(true);
     const [donationAmount, setDonationAmount] = useState(500);
@@ -90,9 +92,9 @@ const CreatorPage = () => {
 
     useEffect(() => {
         const fetchCreatorData = async () => {
-            if (creatorId) {
+            if (creatorUser) {
                 try {
-                    const response = await axios.get(`http://localhost:8000/creator?creator_id=${creatorId}`);
+                    const response = await axios.get(`http://localhost:8000/creator?creator_user=${creatorUser}`);
                     setCreator(response.data);
                 } catch (error) {
                     console.error('Error fetching creator data:', error);
@@ -103,17 +105,17 @@ const CreatorPage = () => {
         };
 
         const fetchRecentDonations = async () => {
-            if (creatorId) {
+            if (creatorUser) {
                 try {
                     // TODO: fetch recent donations from API
-                    const response = await axios.get(`http://localhost:8000/donations?creator_id=${creatorId}`);
+                    const response = await axios.get(`http://localhost:8000/donations?creator_user=${creatorUser}`);
                     setRecentDonations(response.data);
                 } catch (error) {
                     // preenche com dados fake
                     setRecentDonations([
-                        { id: 1, donorName: 'John Doe', amount: 500, comment: 'Great content!' },
-                        { id: 2, donorName: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
-                        { id: 3, donorName: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
+                        { id: 1, donor_name: 'John Doe', amount: 500, comment: 'Great content!' },
+                        { id: 2, donor_name: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
+                        { id: 3, donor_name: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
                     ]);
                     console.error('Error fetching recent donations:', error);
                 }
@@ -122,15 +124,15 @@ const CreatorPage = () => {
 
         fetchCreatorData();
         fetchRecentDonations();
-    }, [creatorId]);
+    }, [creatorUser]);
 
     const handleDonate = async () => {
-        if (!creatorId || !donorName || !donorEmail) return;
+        if (!creatorUser || !donorName || !donorEmail) return;
 
         try {
             const response = await axios.post('http://localhost:8000/checkout', {
                 amount: donationAmount,
-                accountId: creatorId,
+                creator_user: creatorUser,
                 donorName,
                 donorEmail,
                 donorComment,
@@ -231,7 +233,7 @@ const CreatorPage = () => {
                         <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Recent Donations</h2>
                         {recentDonations.slice(0, showAllDonations ? recentDonations.length : 5).map((donation) => (
                             <DonationItem key={donation.id}>
-                                <p><strong>{donation.donorName}</strong> donated R$ {(donation.amount / 100).toFixed(2)}</p>
+                                <p><strong>{donation.donor_name}</strong> donated R$ {(donation.amount / 100).toFixed(2)}</p>
                                 <p>{donation.comment}</p>
                             </DonationItem>
                         ))}
