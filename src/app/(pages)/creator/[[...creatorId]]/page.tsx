@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { w } from 'windstitch';
 import { Button } from '@/src/components/ui/button';
@@ -82,10 +82,11 @@ const CreatorPage = () => {
     const [donorName, setDonorName] = useState('');
     const [donorEmail, setDonorEmail] = useState('');
     const [donorComment, setDonorComment] = useState('');
-    const [customSupps, setCustomSupps] = useState<number | null>(null);
+    const [customSupps, setCustomSupps] = useState<string>('');
     const [recentDonations, setRecentDonations] = useState<DonationProps[]>([]);
     const [showAllDonations, setShowAllDonations] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const customSuppsInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const fetchCreatorData = async () => {
@@ -143,13 +144,24 @@ const CreatorPage = () => {
     };
 
     const handleSuppChange = (value: number) => {
-        setCustomSupps(null);
+        setCustomSupps('');
         setDonationAmount(value);
     };
 
     const handleCustomSuppsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCustomSupps(e.target.value);
         const value = Number(e.target.value);
-        setCustomSupps(value);
+        if (!isNaN(value) && value >= 1) {
+            setDonationAmount(value * 500);
+        } else {
+            setDonationAmount(500); // Valor mínimo de 5 reais
+        }
+    };
+    
+    const handleCustomSuppsBlur = () => {
+        let value = customSupps === '' ? 0 : Number(customSupps);
+        if (value < 1 || customSupps === '') value = 1;
+        setCustomSupps(value === 0 ? '' : value.toString());
         setDonationAmount(value * 500);
     };
 
@@ -196,7 +208,7 @@ const CreatorPage = () => {
 
             <Banner style={{ backgroundImage: 'url(https://via.placeholder.com/600x150)' }} />
             <Content>
-                <Card className="flex-1 md:flex-[0_0_40%]">
+                <Card className="flex-1 md:flex-[0_0_35%]">
                     <ProfileSection>
                         <ProfileImage src="https://via.placeholder.com/150" alt="Creator Profile" />
                         <div>
@@ -231,7 +243,7 @@ const CreatorPage = () => {
                     </div>
                 </Card>
 
-                <Card className="flex-1 md:flex-[0_0_60%]">
+                <Card className="flex-1 md:flex-[0_0_65%]">
                     <h2 className="font-semibold text-lg mb-4 text-[hsl(var(--foreground))]">Support {creator.name}</h2>
                     <div className="mb-4">
                         <RadioGroup className="flex flex-wrap space-x-2" value={donationAmount.toString()} onValueChange={(value) => handleSuppChange(Number(value))}>
@@ -248,13 +260,21 @@ const CreatorPage = () => {
                             <div className="flex items-center space-x-2 flex-1">
                                 <input
                                     type="number"
-                                    placeholder="Custom"
-                                    value={customSupps ?? ''}
+                                    placeholder="Custom Supps"
+                                    value={customSupps}
+                                    ref={customSuppsInputRef}
                                     onChange={handleCustomSuppsChange}
+                                    onBlur={handleCustomSuppsBlur}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleCustomSuppsBlur();
+                                            customSuppsInputRef.current?.blur();
+                                        }
+                                    }}
                                     className="p-2 border rounded bg-[hsl(var(--input))] text-[hsl(var(--foreground))] text-sm w-full"
-                                />
-                            </div>
-                        </RadioGroup>
+                                />  
+                                </div>
+                    </RadioGroup>
                     </div>
                     <input
                         type="text"
