@@ -94,7 +94,7 @@ const CreatorPage = () => {
         const fetchCreatorData = async () => {
             if (creatorUser) {
                 try {
-                    const response = await axios.get(`http://localhost:8000/creator?creator_user=${creatorUser}`);
+                    const response = await axios.get(`https://suppit-backend.deno.dev/creator?creator_user=${creatorUser}`);
                     setCreator(response.data);
                 } catch (error) {
                     console.error('Error fetching creator data:', error);
@@ -108,7 +108,7 @@ const CreatorPage = () => {
             if (creatorUser) {
                 try {
                     // TODO: fetch recent donations from API
-                    const response = await axios.get(`http://localhost:8000/donations?creator_user=${creatorUser}`);
+                    const response = await axios.get(`https://suppit-backend.deno.dev/donations?creator_user=${creatorUser}`);
                     setRecentDonations(response.data);
                 } catch (error) {
                     // preenche com dados fake
@@ -130,7 +130,7 @@ const CreatorPage = () => {
         if (!creatorUser || !donorName || !donorEmail) return;
 
         try {
-            const response = await axios.post('http://localhost:8000/checkout', {
+            const response = await axios.post('https://suppit-backend.deno.dev/checkout', {
                 amount: donationAmount,
                 creator_user: creatorUser,
                 donorName,
@@ -284,6 +284,7 @@ const CreatorPage = () => {
                         value={donorName}
                         onChange={(e) => setDonorName(e.target.value)}
                         className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                        spellCheck="false"
                     />
                     <input
                         type="email"
@@ -291,12 +292,14 @@ const CreatorPage = () => {
                         value={donorEmail}
                         onChange={(e) => setDonorEmail(e.target.value)}
                         className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                        spellCheck="false"
                     />
                     <textarea
                         placeholder="Your Comment"
                         value={donorComment}
                         onChange={(e) => setDonorComment(e.target.value)}
                         className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                        spellCheck="false"
                     />
                     <Button className="mt-4 w-full" onClick={handleDonate}>
                         Donate R$ {(donationAmount / 100).toFixed(2)}

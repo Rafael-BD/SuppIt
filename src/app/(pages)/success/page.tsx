@@ -26,40 +26,6 @@ const SuccessPage = () => {
         return <div>Invalid status</div>;
     }
 
-    useEffect(() => {
-        const sendDonation = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/donate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        creator_user: accountUser,
-                        amount: Number(amount),
-                        donorName,
-                        donorEmail,
-                        sessionId,
-                        comment,
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to send donation');
-                }
-
-                const text = await response.text();
-                const data = text ? JSON.parse(text) : {};
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
-        if (accountUser && amount && donorName && donorEmail) {
-            sendDonation();
-        }
-    }, [accountUser, amount, donorName, donorEmail]);
-
     const amountInReais = (Number(amount) / 100).toFixed(2);
 
     return (
@@ -74,6 +40,8 @@ const SuccessPage = () => {
                     <p>Amount: R$ {amountInReais}</p>
                     <p>Donor Name: {donorName}</p>
                     <p>Donor Email: {donorEmail}</p>
+                    <p>Session ID: {sessionId}</p>
+                    <p>Comment: {comment}</p>
                 </CardContent>
             </StyledCard>
         </Container>
