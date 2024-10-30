@@ -1,12 +1,12 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import { w } from 'windstitch';
 import { Button } from '@/src/components/ui/button';
 import { useParams } from 'next/navigation';
 import { RadioGroup } from '@/src/components/ui/radio-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
-import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon } from 'react-icons/fa';
+import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaTwitch } from 'react-icons/fa';
+import { donate, fetchCreatorData, fetchRecentDonations } from '@/src/api/backend';
 
 interface CreatorProps {
     id: number;
@@ -91,11 +91,11 @@ const CreatorPage = () => {
     const customSuppsInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const fetchCreatorData = async () => {
+        const getCreatorData = async () => {
             if (creatorUser) {
                 try {
-                    const response = await axios.get(`https://suppit-backend.deno.dev/creator?creator_user=${creatorUser}`);
-                    setCreator(response.data);
+                    const data = await fetchCreatorData(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
+                    setCreator(data);
                 } catch (error) {
                     console.error('Error fetching creator data:', error);
                 } finally {
@@ -104,41 +104,40 @@ const CreatorPage = () => {
             }
         };
 
-        const fetchRecentDonations = async () => {
+        const getRecentDonations = async () => {
             if (creatorUser) {
                 try {
-                    // TODO: fetch recent donations from API
-                    const response = await axios.get(`https://suppit-backend.deno.dev/donations?creator_user=${creatorUser}`);
-                    setRecentDonations(response.data);
+                    const data = await fetchRecentDonations(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
+                    setRecentDonations(data);
                 } catch (error) {
-                    // preenche com dados fake
-                    setRecentDonations([
-                        { id: 1, donor_name: 'John Doe', amount: 500, comment: 'Great content!' },
-                        { id: 2, donor_name: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
-                        { id: 3, donor_name: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
-                    ]);
+                    // setRecentDonations([
+                    //     { id: 1, donor_name: 'John Doe', amount: 500, comment: 'Great content!' },
+                    //     { id: 2, donor_name: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
+                    //     { id: 3, donor_name: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
+                    // ]);
                     console.error('Error fetching recent donations:', error);
                 }
             }
         };
 
-        fetchCreatorData();
-        fetchRecentDonations();
+        getCreatorData();
+        getRecentDonations();
     }, [creatorUser]);
 
     const handleDonate = async () => {
         if (!creatorUser || !donorName || !donorEmail) return;
 
         try {
-            const response = await axios.post('https://suppit-backend.deno.dev/checkout', {
+            const body = {
                 amount: donationAmount,
-                creator_user: creatorUser,
+                creator_user: Array.isArray(creatorUser) ? creatorUser[0] : creatorUser,
                 donorName,
                 donorEmail,
                 donorComment,
-            });
+            };
+            const data = await donate(body);
 
-            const { url } = response.data;
+            const { url } = data;
             window.location.href = url;
         } catch (error) {
             console.error('Error during donation process:', error);
@@ -156,7 +155,7 @@ const CreatorPage = () => {
         if (!isNaN(value) && value >= 1) {
             setDonationAmount(value * 500);
         } else {
-            setDonationAmount(500); // Valor mínimo de 5 reais
+            setDonationAmount(500); // Minimum donation amount 5$
         }
     };
     
@@ -184,6 +183,8 @@ const CreatorPage = () => {
         if (social.includes('x.com')) return <FaTwitter />;
         if (social.includes('instagram.com')) return <FaInstagram />;
         if (social.includes('youtube.com')) return <FaYoutube />;
+        if (social.includes('tiktok.com')) return <FaTiktok />;
+        if (social.includes('twitch.tv')) return <FaTwitch />;
         return <FaLock />;
     };
 
