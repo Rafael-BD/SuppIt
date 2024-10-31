@@ -7,6 +7,8 @@ import { RadioGroup } from '@/src/components/ui/radio-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
 import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaTwitch } from 'react-icons/fa';
 import { donate, fetchCreatorData, fetchRecentDonations } from '@/src/api/backend';
+import HomeButton from '@/src/components/homeButton';
+import ThemeToggleButton from '@/src/components/ThemeToggleButton';
 
 interface CreatorProps {
     id: number;
@@ -191,7 +193,7 @@ const CreatorPage = () => {
     return (
         <Container>
             <TopBar>
-                <Logo onClick={() => window.location.href = '/'}>Supp.It</Logo>
+                <HomeButton />
                 <div className="flex items-center space-x-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -203,9 +205,7 @@ const CreatorPage = () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Button variant="outline">Login</Button>
-                    <Button variant="ghost" onClick={toggleTheme}>
-                        {!isDarkMode ? <FaSun /> : <FaMoon />}
-                    </Button>
+                    <ThemeToggleButton />
                 </div>
             </TopBar>
 
