@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import { w } from 'windstitch';

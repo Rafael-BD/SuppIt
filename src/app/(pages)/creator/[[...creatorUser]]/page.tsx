@@ -9,6 +9,8 @@ import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaT
 import { donate, fetchCreatorData, fetchRecentDonations } from '@/src/api/backend';
 import HomeButton from '@/src/components/homeButton';
 import ThemeToggleButton from '@/src/components/ThemeToggleButton';
+import TopBar from '@/src/components/topBar';
+import LoginButton from '@/src/components/loginButton';
 
 interface CreatorProps {
     id: number;
@@ -23,19 +25,10 @@ interface DonationProps {
     donor_name: string;
     amount: number;
     comment: string;
-
 }
 
 const Container = w('div', {
     className: 'flex flex-col items-center justify-start min-h-screen bg-[hsl(var(--background))] pt-0 pb-16',
-});
-
-const TopBar = w('div', {
-    className: 'w-full flex items-center justify-between bg-[hsl(var(--card))] shadow-md p-4 fixed top-0',
-});
-
-const Logo = w('h1', {
-    className: 'text-lg font-bold cursor-pointer text-[hsl(var(--foreground))]',
 });
 
 const Banner = w('div', {
@@ -112,11 +105,6 @@ const CreatorPage = () => {
                     const data = await fetchRecentDonations(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
                     setRecentDonations(data);
                 } catch (error) {
-                    // setRecentDonations([
-                    //     { id: 1, donor_name: 'John Doe', amount: 500, comment: 'Great content!' },
-                    //     { id: 2, donor_name: 'Jane Doe', amount: 1000, comment: 'Keep it up!' },
-                    //     { id: 3, donor_name: 'Alice Doe', amount: 1500, comment: 'Love your work!' },
-                    // ]);
                     console.error('Error fetching recent donations:', error);
                 }
             }
@@ -160,7 +148,7 @@ const CreatorPage = () => {
             setDonationAmount(500); // Minimum donation amount 5$
         }
     };
-    
+
     const handleCustomSuppsBlur = () => {
         let value = customSupps === '' ? 0 : Number(customSupps);
         if (value < 1 || customSupps === '') value = 1;
@@ -194,7 +182,7 @@ const CreatorPage = () => {
         <Container>
             <TopBar>
                 <HomeButton />
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="text-lg">...</Button>
@@ -204,7 +192,7 @@ const CreatorPage = () => {
                             <DropdownMenuItem onClick={() => console.log('Report')}>Report</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button variant="outline">Login</Button>
+                    <LoginButton />
                     <ThemeToggleButton />
                 </div>
             </TopBar>
@@ -307,6 +295,10 @@ const CreatorPage = () => {
                     </Button>
                 </Card>
             </Content>
+            {/* <div className="h-96">
+            </div>
+            <div className="h-96">
+            </div> */}
         </Container>
     );
 };
