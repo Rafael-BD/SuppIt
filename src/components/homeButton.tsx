@@ -1,3 +1,4 @@
+'use client';
 import { w } from 'windstitch';
 
 const HomeButtonContainer = w('div', {

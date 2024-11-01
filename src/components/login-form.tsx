@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -16,29 +16,29 @@ import HomeButton from '@/src/components/homeButton';
 import ThemeToggleButton from '@/src/components/ThemeToggleButton';
 import { login } from '../api/backend';
 import Topbar from './topBar';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Container = w('div', {
     className: 'flex items-center justify-center min-h-screen relative w-full px-4',
 });
 
 export function LoginForm() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async (): Promise<void> => {
-        const email = document.getElementById('email') as HTMLInputElement;
-        const password = document.getElementById('password') as HTMLInputElement;
-        
-        try{
+        try {
             const body = {
-                email: email.value,
-                password: password.value
+                email,
+                password,
             };
             const response = await login(body);
-            if(response.status === 200){
+            if (response.status === 200) {
                 window.location.href = '/dashboard';
             } else {
                 console.error(response);
             }
-
         } catch (error) {
             console.error(error);
         }
@@ -74,6 +74,8 @@ export function LoginForm() {
                                 type="email"
                                 placeholder="m@example.com"
                                 required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div className="grid gap-2">
@@ -83,16 +85,27 @@ export function LoginForm() {
                                     Forgot your password?
                                 </Link>
                             </div>
-                            <Input 
-                                id="password" 
-                                type="password" 
-                                required 
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                            </div>
                         </div>
                         <Button type="submit" className="w-full" onClick={handleSubmit}>
                             Login
                         </Button>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
                             Login with Google
                         </Button>
                     </div>
