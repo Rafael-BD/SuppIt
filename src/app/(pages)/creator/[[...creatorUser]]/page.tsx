@@ -82,7 +82,6 @@ const CreatorPage = () => {
     const [customSupps, setCustomSupps] = useState<string>('');
     const [recentDonations, setRecentDonations] = useState<DonationProps[]>([]);
     const [showAllDonations, setShowAllDonations] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const customSuppsInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -90,9 +89,14 @@ const CreatorPage = () => {
             if (creatorUser) {
                 try {
                     const data = await fetchCreatorPageData(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
-                    setCreator(data);
+                    if (data.name) {
+                        setCreator(data);
+                    } else {
+                        setCreator(null);
+                    }
                 } catch (error) {
                     console.error('Error fetching creator data:', error);
+                    setCreator(null);
                 } finally {
                     setLoading(false);
                 }
@@ -156,17 +160,37 @@ const CreatorPage = () => {
         setDonationAmount(value * 500);
     };
 
-    const toggleTheme = () => {
-        setIsDarkMode(!isDarkMode);
-        document.documentElement.classList.toggle('dark', !isDarkMode);
-    };
-
     if (loading) {
         return <div>Loading...</div>;
     }
 
     if (!creator) {
-        return <div>Creator not found</div>;
+        return (
+            <Container>
+                <TopBar>
+                    <HomeButton />
+                    <div className="flex items-center space-x-6">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="text-lg">...</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => console.log('Share')}>Share</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => console.log('Report')}>Report</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <LoginButton />
+                        <ThemeToggleButton />
+                    </div>
+                </TopBar>
+                <Content>
+                    <Card className="flex-1 mt-14">
+                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Creator not found</h2>
+                        <p className="text-[hsl(var(--muted-foreground))]">The creator you are looking for does not exist.</p>
+                    </Card>
+                </Content>
+            </Container>
+        )
     }
 
     const getSocialIcon = (social: string) => {
