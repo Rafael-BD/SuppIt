@@ -14,6 +14,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
+import { updateAccount } from "../api/backend";
 
 const profileFormSchema = z.object({
     name: z.string().max(20, { message: "Name must be at most 20 characters." }),
@@ -37,10 +38,12 @@ export function ProfileForm() {
         mode: "onChange",
     });
 
-    function onSubmit(data: ProfileFormValues) {
+    async function onSubmit(data: ProfileFormValues) {
         toast({
             title: "Profile Updated",
         });
+        console.log(data);
+        await updateAccount(data);
     }
 
     return (
