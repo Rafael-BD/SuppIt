@@ -12,9 +12,9 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { w } from 'windstitch';
-import HomeButton from '@/src/components/homeButton';
-import ThemeToggleButton from '@/src/components/ThemeToggleButton';
-import { login } from '../api/backend';
+import HomeButton from '@/src/components/home-btn';
+import ThemeToggleButton from '@/src/components/ThemeToggle-btn';
+import { login, checkIfAccountExists } from '../api/backend';
 import Topbar from './topBar';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 

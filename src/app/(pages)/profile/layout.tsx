@@ -3,8 +3,8 @@ import Image from "next/image";
 import { Separator } from "@/src/components/ui/separator";
 import { SidebarNav } from "@/src/components/sidebarNav";
 import TopBar from "@/src/components/topBar";
-import HomeButton from "@/src/components/homeButton";
-import ThemeToggleButton from "@/src/components/ThemeToggleButton";
+import HomeButton from "@/src/components/home-btn";
+import ThemeToggleButton from "@/src/components/ThemeToggle-btn";
 
 export const metadata: Metadata = {
     title: "Settings",

@@ -1,5 +1,5 @@
 import { Separator } from "@/src/components/ui/separator";
-import { PageForm } from "@/src/components/pageForm";
+import { PageForm } from "@/src/components/page-form";
 
 export default function SettingsPagePage() {
     return (

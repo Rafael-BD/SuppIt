@@ -7,10 +7,10 @@ import { RadioGroup } from '@/src/components/ui/radio-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
 import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaTwitch } from 'react-icons/fa';
 import { donate, fetchCreatorPageData, fetchRecentDonations } from '@/src/api/backend';
-import HomeButton from '@/src/components/homeButton';
-import ThemeToggleButton from '@/src/components/ThemeToggleButton';
+import HomeButton from '@/src/components/home-btn';
+import ThemeToggleButton from '@/src/components/ThemeToggle-btn';
 import TopBar from '@/src/components/topBar';
-import LoginButton from '@/src/components/loginButton';
+import LoginButton from '@/src/components/login-btn';
 
 interface CreatorProps {
     id: number;

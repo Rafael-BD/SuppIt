@@ -17,7 +17,7 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "../hooks/use-toast";
 import { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
-import { fetchCreatorPageData, createPage, updatePage } from "../api/backend";
+import { fetchCreatorPageData, createPage, updatePage, fetchAccountData } from "../api/backend";
 
 const imageFile = z.instanceof(File).refine(file => file.type.startsWith("image/"), {
     message: "File must be an image.",
@@ -58,8 +58,8 @@ export function PageForm() {
     useEffect(() => {
         const initializeForm = async () => {
             try {
-                const creatorUser = "exampleUser"; // Substitua pelo valor real do usuário criador
-                const pageData = await fetchCreatorPageData(creatorUser);
+                const {user} = await fetchAccountData();
+                const pageData = await fetchCreatorPageData(user);
 
                 if (pageData) {
                     form.setValue("description", pageData.description || "");
@@ -84,30 +84,38 @@ export function PageForm() {
     }, [form]);
 
     async function onSubmit(data: PageFormValues) {
-        // Remove empty URLs before submitting
         data.urls = data.urls?.filter(url => url.value.trim() !== "") || [];
 
         try {
+            let response;
             if (!pageAlreadyExists) {
-                await createPage({
+                response = await createPage({
                     description: data.description || "",
                     socials: data.urls.map(url => url.value),
                     banner_img: data.banner_img ? URL.createObjectURL(data.banner_img) : "",
                     profile_img: data.profile_img ? URL.createObjectURL(data.profile_img) : "",
                 });
-                toast({
-                    title: "Page Created",
-                });
+                if (response.status === 201) {
+                    toast({
+                        title: "Page Created",
+                    });
+                } else {
+                    throw new Error("Failed to create page");
+                }
             } else {
-                await updatePage({
+                response = await updatePage({
                     description: data.description || "",
                     socials: data.urls.map(url => url.value),
                     banner_img: data.banner_img ? URL.createObjectURL(data.banner_img) : "",
                     profile_img: data.profile_img ? URL.createObjectURL(data.profile_img) : "",
                 });
-                toast({
-                    title: "Page Updated",
-                });
+                if (response.status === 200) {
+                    toast({
+                        title: "Page Updated",
+                    });
+                } else {
+                    throw new Error("Failed to update page");
+                }
             }
         } catch (error) {
             toast({
