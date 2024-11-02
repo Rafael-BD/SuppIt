@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { RadioGroup } from '@/src/components/ui/radio-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
 import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaTwitch } from 'react-icons/fa';
-import { donate, fetchCreatorData, fetchRecentDonations } from '@/src/api/backend';
+import { donate, fetchCreatorPageData, fetchRecentDonations } from '@/src/api/backend';
 import HomeButton from '@/src/components/homeButton';
 import ThemeToggleButton from '@/src/components/ThemeToggleButton';
 import TopBar from '@/src/components/topBar';
@@ -89,7 +89,7 @@ const CreatorPage = () => {
         const getCreatorData = async () => {
             if (creatorUser) {
                 try {
-                    const data = await fetchCreatorData(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
+                    const data = await fetchCreatorPageData(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
                     setCreator(data);
                 } catch (error) {
                     console.error('Error fetching creator data:', error);

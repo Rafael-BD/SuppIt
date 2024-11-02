@@ -15,8 +15,9 @@ import {
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "../hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import { fetchCreatorPageData, createPage, updatePage } from "../api/backend";
 
 const imageFile = z.instanceof(File).refine(file => file.type.startsWith("image/"), {
     message: "File must be an image.",
@@ -34,6 +35,7 @@ type PageFormValues = z.infer<typeof pageFormSchema>;
 
 export function PageForm() {
     const { toast } = useToast();
+    const [pageAlreadyExists, setPageAlreadyExists] = useState(false);
     const [profileImgPreview, setProfileImgPreview] = useState<string | null>(null);
     const [bannerImgPreview, setBannerImgPreview] = useState<string | null>(null);
 
@@ -53,13 +55,66 @@ export function PageForm() {
         control: form.control,
     });
 
-    function onSubmit(data: PageFormValues) {
+    useEffect(() => {
+        const initializeForm = async () => {
+            try {
+                const creatorUser = "exampleUser"; // Substitua pelo valor real do usuário criador
+                const pageData = await fetchCreatorPageData(creatorUser);
+
+                if (pageData) {
+                    form.setValue("description", pageData.description || "");
+                    form.setValue("urls", pageData.socials.map((url: string) => ({ value: url })));
+                    if (pageData.profile_img) {
+                        setProfileImgPreview(pageData.profile_img);
+                    }
+                    if (pageData.banner_img) {
+                        setBannerImgPreview(pageData.banner_img);
+                    }
+                    setPageAlreadyExists(true);
+                }
+                else {
+                    setPageAlreadyExists(false);
+                }
+            } catch (error) {
+                console.error("Error fetching creator page data:", error);
+            }
+        };
+
+        initializeForm();
+    }, [form]);
+
+    async function onSubmit(data: PageFormValues) {
         // Remove empty URLs before submitting
         data.urls = data.urls?.filter(url => url.value.trim() !== "") || [];
-        // Display toast notification
-        toast({
-            title: "Page Updated",
-        });
+
+        try {
+            if (!pageAlreadyExists) {
+                await createPage({
+                    description: data.description || "",
+                    socials: data.urls.map(url => url.value),
+                    banner_img: data.banner_img ? URL.createObjectURL(data.banner_img) : "",
+                    profile_img: data.profile_img ? URL.createObjectURL(data.profile_img) : "",
+                });
+                toast({
+                    title: "Page Created",
+                });
+            } else {
+                await updatePage({
+                    description: data.description || "",
+                    socials: data.urls.map(url => url.value),
+                    banner_img: data.banner_img ? URL.createObjectURL(data.banner_img) : "",
+                    profile_img: data.profile_img ? URL.createObjectURL(data.profile_img) : "",
+                });
+                toast({
+                    title: "Page Updated",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "An error occurred while updating the page.",
+            });
+        }
     }
 
     function handleProfileImgChange(event: React.ChangeEvent<HTMLInputElement>) {

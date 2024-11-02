@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000';
 
-export const fetchCreatorData = async (creatorUser: string) => {
+export const fetchCreatorPageData = async (creatorUser: string) => {
     const response = await axios.get(`${API_URL}/creator?creator_user=${creatorUser}`);
     return response.data;
 };
@@ -40,5 +40,10 @@ export const createPage = async (data: { description: string; socials: string[],
 export const updatePage = async (data: { description: string; socials: string[], banner_img: string, profile_img: string }) => {
     const response = await axios.put(`${API_URL}/page-update`, data, { withCredentials: true });
     return response;
+};
+
+export const fetchAccountData = async () => {
+    const response = await axios.get(`${API_URL}/account`, { withCredentials: true });
+    return response.data;
 };
 

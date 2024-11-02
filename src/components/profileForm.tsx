@@ -14,7 +14,8 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
-import { updateAccount } from "../api/backend";
+import { updateAccount, fetchAccountData } from "../api/backend";
+import { useEffect } from "react";
 
 const profileFormSchema = z.object({
     name: z.string().max(20, { message: "Name must be at most 20 characters." }),
@@ -37,6 +38,14 @@ export function ProfileForm() {
         },
         mode: "onChange",
     });
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const data = await fetchAccountData();
+            form.reset(data);
+        };
+        fetchProfile();
+    }, [form]);
 
     async function onSubmit(data: ProfileFormValues) {
         toast({
