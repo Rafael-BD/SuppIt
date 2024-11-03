@@ -20,13 +20,17 @@ const sidebarNavItems = [
         title: "Page",
         href: "/profile/page",
     },
+    {
+        title: "Payments",
+        href: "/profile/payments",
+    },
 ];
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
 }
 
-export default function SettingsLayout({ children }: SettingsLayoutProps) { // FIXME: Add responsive style
+export default function SettingsLayout({ children }: SettingsLayoutProps) {
     return (
         <>
             <TopBar>

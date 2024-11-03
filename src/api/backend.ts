@@ -91,3 +91,12 @@ export const checkIfAccountExists = async (data: { email: string, user: string, 
         return (error as any).response;
     }
 };
+
+export const registerStripe = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/account-stripe`, { withCredentials: true });
+        return response;
+    } catch (error) {
+        return (error as any).response;
+    }
+};
