@@ -18,6 +18,7 @@ import { updateAccount, fetchAccountData, checkIfAccountExists } from "../api/ba
 import { useEffect, useState } from "react";
 import { Separator } from "./ui/separator";
 import { Loader2 } from "lucide-react";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const profileFormSchema = z.object({
     name: z.string().max(20, { message: "Name must be at most 20 characters." }).min(1, { message: "Name must be at least 1 character." }),
@@ -37,6 +38,10 @@ export function ProfileForm() {
     const { toast } = useToast();
     const [availability, setAvailability] = useState({ emailExists: false, userExists: false, nameExists: false });
     const [isUpdating, setIsUpdating] = useState(false);
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
@@ -151,7 +156,16 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel>Old Password</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="******" {...field} />
+                                    <div className="relative">
+                                        <Input type={showOldPassword ? "text" : "password"} placeholder="******" {...field} />
+                                        <button
+                                            type="button"
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                            onClick={() => setShowOldPassword(!showOldPassword)}
+                                        >
+                                            {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </button>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -164,7 +178,16 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel>New Password</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="******" {...field} />
+                                    <div className="relative">
+                                        <Input type={showNewPassword ? "text" : "password"} placeholder="******" {...field} />
+                                        <button
+                                            type="button"
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                        >
+                                            {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </button>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -177,7 +200,16 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel>Confirm New Password</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="******" {...field} />
+                                    <div className="relative">
+                                        <Input type={showConfirmPassword ? "text" : "password"} placeholder="******" {...field} />
+                                        <button
+                                            type="button"
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        >
+                                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </button>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
