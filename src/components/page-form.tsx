@@ -17,7 +17,9 @@ import { Textarea } from "./ui/textarea";
 import { useToast } from "../hooks/use-toast";
 import { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import { Loader2 } from "lucide-react";
 import { fetchCreatorPageData, createPage, updatePage, fetchAccountData } from "../api/backend";
+import Link from "next/link";
 
 const imageFile = z.instanceof(File).refine(file => file.type.startsWith("image/"), {
     message: "File must be an image.",
@@ -38,6 +40,8 @@ export function PageForm() {
     const [pageAlreadyExists, setPageAlreadyExists] = useState(false);
     const [profileImgPreview, setProfileImgPreview] = useState<string | null>(null);
     const [bannerImgPreview, setBannerImgPreview] = useState<string | null>(null);
+    const [stripeLinked, setStripeLinked] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const form = useForm<PageFormValues>({
         resolver: zodResolver(pageFormSchema),
@@ -58,7 +62,10 @@ export function PageForm() {
     useEffect(() => {
         const initializeForm = async () => {
             try {
-                const {user} = await fetchAccountData();
+                const { user, stripe_id } = await fetchAccountData();
+                if (stripe_id) {
+                    setStripeLinked(true);
+                }
                 const pageData = await fetchCreatorPageData(user);
 
                 if (pageData) {
@@ -71,8 +78,7 @@ export function PageForm() {
                         setBannerImgPreview(pageData.banner_img);
                     }
                     setPageAlreadyExists(true);
-                }
-                else {
+                } else {
                     setPageAlreadyExists(false);
                 }
             } catch (error) {
@@ -84,6 +90,7 @@ export function PageForm() {
     }, [form]);
 
     async function onSubmit(data: PageFormValues) {
+        setIsUpdating(true);
         data.urls = data.urls?.filter(url => url.value.trim() !== "") || [];
 
         try {
@@ -122,6 +129,8 @@ export function PageForm() {
                 title: "Error",
                 description: "An error occurred while updating the page.",
             });
+        } finally {
+            setIsUpdating(false);
         }
     }
 
@@ -161,6 +170,12 @@ export function PageForm() {
         <ToastProvider>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    {!stripeLinked && (
+                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                            <p className="font-bold">Attention</p>
+                            <p>Your page will only be available if your Stripe account is created. <Link href="/profile/payments" className="underline">Go to Payments</Link></p>
+                        </div>
+                    )}
                     <FormField
                         control={form.control}
                         name="description"
@@ -241,7 +256,16 @@ export function PageForm() {
                             Add URL
                         </Button>
                     </div>
-                    <Button type="submit">Update Page</Button>
+                    <Button type="submit" disabled={isUpdating}>
+                        {isUpdating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Please wait
+                            </>
+                        ) : (
+                            "Update Page"
+                        )}
+                    </Button>
                 </form>
             </Form>
             <ToastViewport />

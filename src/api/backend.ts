@@ -22,7 +22,7 @@ export const fetchRecentDonations = async (creatorUser: string) => {
 
 export const donate = async (data: { creator_user: string; amount: number, donorName: string, donorEmail: string, donorComment: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/donate`, data);
+        const response = await axios.post(`${API_URL}/checkout`, data);
         return response.data;
     } catch (error) {
         return (error as any).response;

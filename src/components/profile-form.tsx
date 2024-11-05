@@ -17,6 +17,7 @@ import { useToast } from "../hooks/use-toast";
 import { updateAccount, fetchAccountData, checkIfAccountExists } from "../api/backend";
 import { useEffect, useState } from "react";
 import { Separator } from "./ui/separator";
+import { Loader2 } from "lucide-react";
 
 const profileFormSchema = z.object({
     name: z.string().max(20, { message: "Name must be at most 20 characters." }).min(1, { message: "Name must be at least 1 character." }),
@@ -35,6 +36,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function ProfileForm() {
     const { toast } = useToast();
     const [availability, setAvailability] = useState({ emailExists: false, userExists: false, nameExists: false });
+    const [isUpdating, setIsUpdating] = useState(false);
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
@@ -58,6 +60,7 @@ export function ProfileForm() {
     }, [form]);
 
     async function onSubmit(data: ProfileFormValues) {
+        setIsUpdating(true);
         const response = await checkIfAccountExists({
             email: data.email,
             user: data.user,
@@ -67,6 +70,7 @@ export function ProfileForm() {
         setAvailability({ emailExists, userExists, nameExists });
 
         if (emailExists || userExists || nameExists) {
+            setIsUpdating(false);
             return;
         }
         const updateResponse = await updateAccount({
@@ -90,6 +94,7 @@ export function ProfileForm() {
                 color: "error",
             });
         }
+        setIsUpdating(false);
     }
 
     return (
@@ -178,7 +183,16 @@ export function ProfileForm() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit">Update Profile</Button>
+                    <Button type="submit" disabled={isUpdating}>
+                        {isUpdating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Please wait
+                            </>
+                        ) : (
+                            "Update Profile"
+                        )}
+                    </Button>
                 </form>
             </Form>
             <ToastViewport />

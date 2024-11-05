@@ -5,7 +5,8 @@ import { Button } from '@/src/components/ui/button';
 import { useParams } from 'next/navigation';
 import { RadioGroup } from '@/src/components/ui/radio-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
-import { FaTwitter, FaInstagram, FaYoutube, FaLock, FaSun, FaMoon, FaTiktok, FaTwitch } from 'react-icons/fa';
+import { FaTwitter, FaInstagram, FaYoutube, FaTiktok, FaTwitch } from 'react-icons/fa';
+import { Loader2, Link } from 'lucide-react';
 import { donate, fetchCreatorPageData, fetchRecentDonations } from '@/src/api/backend';
 import HomeButton from '@/src/components/home-btn';
 import ThemeToggleButton from '@/src/components/ThemeToggle-btn';
@@ -82,6 +83,7 @@ const CreatorPage = () => {
     const [customSupps, setCustomSupps] = useState<string>('');
     const [recentDonations, setRecentDonations] = useState<DonationProps[]>([]);
     const [showAllDonations, setShowAllDonations] = useState(false);
+    const [isDonating, setIsDonating] = useState(false);
     const customSuppsInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -121,6 +123,8 @@ const CreatorPage = () => {
     const handleDonate = async () => {
         if (!creatorUser || !donorName || !donorEmail) return;
 
+        setIsDonating(true);
+
         try {
             const body = {
                 amount: donationAmount,
@@ -135,6 +139,8 @@ const CreatorPage = () => {
             window.location.href = url;
         } catch (error) {
             console.error('Error during donation process:', error);
+        } finally {
+            setIsDonating(false);
         }
     };
 
@@ -199,7 +205,7 @@ const CreatorPage = () => {
         if (social.includes('youtube.com')) return <FaYoutube />;
         if (social.includes('tiktok.com')) return <FaTiktok />;
         if (social.includes('twitch.tv')) return <FaTwitch />;
-        return <FaLock />;
+        return <Link />;
     };
 
     return (
@@ -314,15 +320,18 @@ const CreatorPage = () => {
                         className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
                         spellCheck="false"
                     />
-                    <Button className="mt-4 w-full" onClick={handleDonate}>
-                        Donate R$ {(donationAmount / 100).toFixed(2)}
+                    <Button className="mt-4 w-full" onClick={handleDonate} disabled={isDonating}>
+                        {isDonating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Please wait
+                            </>
+                        ) : (
+                            `Donate R$ ${(donationAmount / 100).toFixed(2)}`
+                        )}
                     </Button>
                 </Card>
             </Content>
-            {/* <div className="h-96">
-            </div>
-            <div className="h-96">
-            </div> */}
         </Container>
     );
 };

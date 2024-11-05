@@ -4,10 +4,12 @@ import { Button } from "@/src/components/ui/button";
 import { Separator } from "@/src/components/ui/separator";
 import { useToast } from "@/src/hooks/use-toast";
 import { fetchAccountData, registerStripe } from "@/src/api/backend";
+import { Loader2 } from "lucide-react";
 
 export default function SettingsPaymentsPage() {
     const { toast } = useToast();
     const [stripeLinked, setStripeLinked] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
 
     useEffect(() => {
         const checkStripeLink = async () => {
@@ -25,6 +27,7 @@ export default function SettingsPaymentsPage() {
     }, []);
 
     async function handleRegisterStripe() {
+        setIsRegistering(true);
         try {
             const response = await registerStripe();
             const { url } = response.data.acc;
@@ -36,6 +39,8 @@ export default function SettingsPaymentsPage() {
                 description: "Failed to register Stripe account. Please try again.",
                 color: "error",
             });
+        } finally {
+            setIsRegistering(false);
         }
     }
 
@@ -53,8 +58,15 @@ export default function SettingsPaymentsPage() {
                     <p>Your account is already linked to Stripe.</p>
                 </div>
             ) : (
-                <Button type="button" variant="outline" onClick={handleRegisterStripe}>
-                    Register with Stripe
+                <Button type="button" variant="outline" onClick={handleRegisterStripe} disabled={isRegistering}>
+                    {isRegistering ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Please wait
+                        </>
+                    ) : (
+                        "Register with Stripe"
+                    )}
                 </Button>
             )}
         </div>
