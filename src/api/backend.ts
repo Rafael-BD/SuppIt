@@ -100,3 +100,12 @@ export const registerStripe = async () => {
         return (error as any).response;
     }
 };
+
+export const saveStripeId = async (data: { stripe_id: string }) => {
+    try {
+        const response = await axios.post(`${API_URL}/account-stripe`, data, { withCredentials: true });
+        return response;
+    } catch (error) {
+        return (error as any).response;
+    }
+}
