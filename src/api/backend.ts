@@ -109,3 +109,21 @@ export const saveStripeId = async (data: { stripe_id: string }) => {
         return (error as any).response;
     }
 }
+
+export const fetchBalance = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/balance`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        return (error as any).response;
+    }
+};
+
+export const fetchBalanceTransactions = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/transactions`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        return (error as any).response;
+    }
+};
