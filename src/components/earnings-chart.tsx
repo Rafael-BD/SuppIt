@@ -30,7 +30,7 @@ const defaultChartData = [
 const chartConfig = {
     earnings: {
         label: "Earnings",
-        color: "hsl(var(--primary))",
+        color: "hsl(var(--chart-1))",
         icon: Award,
     },
 } satisfies ChartConfig;
@@ -46,7 +46,7 @@ const mergeChartData = (defaultData: ChartData[], actualData: ChartData[]): Char
     return mergedData;
 };
 
-const EarningsChart = ({ size = 2, data = [] }: { size?: number; data: YearlyData[] }) => {
+const EarningsChart = ({ size, data = [] }: { size: number; data: YearlyData[] }) => {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const handleYearChange = (year: number) => {
         setSelectedYear(year);
@@ -58,7 +58,7 @@ const EarningsChart = ({ size = 2, data = [] }: { size?: number; data: YearlyDat
     const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
 
     return (
-        <div className={`w-${size}/6 flex flex-col items-center`}> 
+        <div className={`w-full flex flex-col items-center`}> 
             <div className="flex justify-center items-center mb-4 w-1/4">
                 <button onClick={() => handleYearChange(selectedYear - 1)}>
                     <ChevronLeft />
@@ -79,7 +79,7 @@ const EarningsChart = ({ size = 2, data = [] }: { size?: number; data: YearlyDat
                     <ChevronRight />
                 </button>
             </div>
-            <ChartContainer config={chartConfig} className="w-full h-64">
+            <ChartContainer config={chartConfig} className="max-h-80 w-full">
                 <BarChart width={600} height={400} data={mergedData}>
                     <CartesianGrid vertical={false} />
                     <XAxis
