@@ -5,6 +5,7 @@ import { SidebarNav } from "@/src/components/sidebarNav";
 import TopBar from "@/src/components/topBar";
 import HomeButton from "@/src/components/home-btn";
 import ThemeToggleButton from "@/src/components/ThemeToggle-btn";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -35,7 +36,12 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         <>
             <TopBar>
                 <HomeButton />
-                <ThemeToggleButton />
+                <div className="flex items-center justify-center space-x-6">
+                    <Link href="/dashboard">
+                        <p className="text-md border border--border p-2 rounded">Dashboard</p>
+                    </Link>
+                    <ThemeToggleButton />
+                </div>
             </TopBar>
             <div className="hidden space-y-6 p-10 pb-16 mt-10 md:block">
                 <div className="space-y-0.5">

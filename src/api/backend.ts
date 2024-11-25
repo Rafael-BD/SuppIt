@@ -77,7 +77,7 @@ export const updatePage = async (data: { description: string; socials: string[],
 export const fetchAccountData = async () => {
     try {
         const response = await axios.get(`${API_URL}/account`, { withCredentials: true });
-        return response.data;
+        return { status: response.status, data: response.data };
     } catch (error) {
         return (error as any).response;
     }

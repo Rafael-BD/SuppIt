@@ -57,8 +57,7 @@ export function ProfileForm() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const data = await fetchAccountData();
-            console.log(data);
+            const {data} = await fetchAccountData();
             form.reset(data);
         };
         fetchProfile();

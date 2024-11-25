@@ -21,6 +21,12 @@ import EarningChart from '@/src/components/earnings-chart';
 import { Donate, RecentDonates } from '@/src/components/recentDonates';
 import { Button } from '@/src/components/ui/button';
 import { w } from 'windstitch';
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from '@/src/components/ui/tabs';
 
 interface Transaction {
     available_on: number;
@@ -56,7 +62,7 @@ const FlexItemsCenterSpace = w('div', {
 });
 
 const Flex1SpaceY = w('div', {
-    className: 'flex-1 space-y-4 py-8 pt-6',
+    className: 'flex-1 space-y-4 py-8 pt-3',
 });
 
 const GridCols = w('div', {
@@ -260,122 +266,141 @@ const DashboardPage: React.FC = () => {
                     </FlexItemsCenter>
                 </BorderBottom>
                 <Flex1SpaceY>
-                <GridCols>
-                        <Card>
-                            <HeaderCard>
-                                <TitleCard>Total Revenue</TitleCard>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    className="h-4 w-4 text-muted-foreground"
-                                >
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                                </svg>
-                            </HeaderCard>
-                            <CardContent>
-                                <CardValue>{`R$${totalRevenue.toFixed(2)}`}</CardValue>
-                                <DescriptionCard>
-                                    {`${revenuePercentChange >= 0 ? '+' : ''}${revenuePercentChange.toFixed(
-                                        1
-                                    )}% from last month`}
-                                </DescriptionCard>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <HeaderCard>
-                                <TitleCard>Subscriptions</TitleCard>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    className="h-4 w-4 text-muted-foreground"
-                                >
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                                </svg>
-                            </HeaderCard>
-                            <CardContent>
-                                <CardValue>+2350</CardValue>
-                                <DescriptionCard>+180.1% from last month</DescriptionCard>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <HeaderCard>
-                                <TitleCard>Donations</TitleCard>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    className="h-4 w-4 text-muted-foreground"
-                                >
-                                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                                    <path d="M2 10h20" />
-                                </svg>
-                            </HeaderCard>
-                            <CardContent>
-                                <CardValue>{totalDonations}</CardValue>
-                                <DescriptionCard>
-                                    {`${donationsPercentChange >= 0 ? '+' : ''}${donationsPercentChange.toFixed(
-                                        1
-                                    )}% from last month`}
-                                </DescriptionCard>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <HeaderCard>
-                                <TitleCard>Active Now</TitleCard>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    className="h-4 w-4 text-muted-foreground"
-                                >
-                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                                </svg>
-                            </HeaderCard>
-                            <CardContent>
-                                <CardValue>+573</CardValue>
-                                <DescriptionCard>+201 since last hour</DescriptionCard>
-                            </CardContent>
-                        </Card>
-                    </GridCols>
-                    <GridColsLarge>
-                        <ColSpan4>
-                            <CardHeader>
-                                <CardTitle>Earnings</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pl-2">
-                                <EarningChart size={2} data={transactions} />
-                            </CardContent>
-                        </ColSpan4>
-                        <ColSpan3>
-                            <CardHeader>
-                                <CardTitle>Recent Donations</CardTitle>
-                                <CardDescription>{`You received ${thisMonthDonationCount} donations this month.`}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <RecentDonates donates={recentDonates} />
-                            </CardContent>
-                        </ColSpan3>
-                    </GridColsLarge>
+                    <Tabs defaultValue="overview" className="space-y-4">
+                        <TabsList>
+                            <TabsTrigger value="overview">Overview</TabsTrigger>
+                            <TabsTrigger value="saldo">Saldo</TabsTrigger>
+                            <TabsTrigger value="beneficios">Benefícios</TabsTrigger>
+                            <TabsTrigger value="embbed">Embbed</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="overview" className="space-y-4">
+                            <GridCols>
+                                <Card>
+                                    <HeaderCard>
+                                        <TitleCard>Total Revenue</TitleCard>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            className="h-4 w-4 text-muted-foreground"
+                                        >
+                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                        </svg>
+                                    </HeaderCard>
+                                    <CardContent>
+                                        <CardValue>{`R$${totalRevenue.toFixed(2)}`}</CardValue>
+                                        <DescriptionCard>
+                                            {`${revenuePercentChange >= 0 ? '+' : ''}${revenuePercentChange.toFixed(
+                                                1
+                                            )}% from last month`}
+                                        </DescriptionCard>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <HeaderCard>
+                                        <TitleCard>Subscriptions</TitleCard>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            className="h-4 w-4 text-muted-foreground"
+                                        >
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                            <circle cx="9" cy="7" r="4" />
+                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                                        </svg>
+                                    </HeaderCard>
+                                    <CardContent>
+                                        <CardValue>+2350</CardValue>
+                                        <DescriptionCard>+180.1% from last month</DescriptionCard>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <HeaderCard>
+                                        <TitleCard>Donations</TitleCard>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            className="h-4 w-4 text-muted-foreground"
+                                        >
+                                            <rect width="20" height="14" x="2" y="5" rx="2" />
+                                            <path d="M2 10h20" />
+                                        </svg>
+                                    </HeaderCard>
+                                    <CardContent>
+                                        <CardValue>{totalDonations}</CardValue>
+                                        <DescriptionCard>
+                                            {`${donationsPercentChange >= 0 ? '+' : ''}${donationsPercentChange.toFixed(
+                                                1
+                                            )}% from last month`}
+                                        </DescriptionCard>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <HeaderCard>
+                                        <TitleCard>Active Now</TitleCard>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            className="h-4 w-4 text-muted-foreground"
+                                        >
+                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                        </svg>
+                                    </HeaderCard>
+                                    <CardContent>
+                                        <CardValue>+573</CardValue>
+                                        <DescriptionCard>+201 since last hour</DescriptionCard>
+                                    </CardContent>
+                                </Card>
+                            </GridCols>
+                            <GridColsLarge>
+                                <ColSpan4>
+                                    <CardHeader>
+                                        <CardTitle>Earnings</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="pl-2">
+                                        <EarningChart size={2} data={transactions} />
+                                    </CardContent>
+                                </ColSpan4>
+                                <ColSpan3>
+                                    <CardHeader>
+                                        <CardTitle>Recent Donations</CardTitle>
+                                        <CardDescription>{`You received ${thisMonthDonationCount} donations this month.`}</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <RecentDonates donates={recentDonates} />
+                                    </CardContent>
+                                </ColSpan3>
+                            </GridColsLarge>
+                        </TabsContent>
+                        <TabsContent value="saldo" className="space-y-4">
+                            <div>Saldo Content</div>
+                        </TabsContent>
+                        <TabsContent value="beneficios" className="space-y-4">
+                            <div>Benefícios Content</div>
+                        </TabsContent>
+                        <TabsContent value="embbed" className="space-y-4">
+                            <div>Embbed Content</div>
+                        </TabsContent>
+                    </Tabs>
                 </Flex1SpaceY>
             </HiddenFlexCol>
         </div>

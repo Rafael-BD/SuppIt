@@ -62,7 +62,8 @@ export function PageForm() {
     useEffect(() => {
         const initializeForm = async () => {
             try {
-                const { user, stripe_id } = await fetchAccountData();
+                const data = await fetchAccountData();
+                const { user, stripe_id } = data.data;
                 if (stripe_id) {
                     setStripeLinked(true);
                 }
@@ -70,7 +71,7 @@ export function PageForm() {
 
                 if (pageData) {
                     form.setValue("description", pageData.description || "");
-                    form.setValue("urls", pageData.socials.map((url: string) => ({ value: url })));
+                    form.setValue("urls", pageData.socials ? pageData.socials.map((url: string) => ({ value: url })) : []);
                     if (pageData.profile_img) {
                         setProfileImgPreview(pageData.profile_img);
                     }

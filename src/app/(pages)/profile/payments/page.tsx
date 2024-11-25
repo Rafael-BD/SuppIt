@@ -15,7 +15,8 @@ export default function SettingsPaymentsPage() {
         const checkStripeLink = async () => {
             try {
                 const data = await fetchAccountData();
-                if (data.stripe_id) {
+                const { stripe_id } = data.data;
+                if (stripe_id) {
                     setStripeLinked(true);
                 }
             } catch (error) {
