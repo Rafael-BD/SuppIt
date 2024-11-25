@@ -1,136 +1,238 @@
 'use client';
-import { fetchBalance, fetchBalanceTransactions } from '@/src/api/backend';
+import React, { useEffect, useState } from 'react';
+import {
+    fetchBalance,
+    fetchBalanceTransactions,
+    fetchRecentDonations,
+} from '@/src/api/backend';
 import HomeButton from '@/src/components/home-btn';
 import LoginButton from '@/src/components/login-btn';
 import ThemeToggleButton from '@/src/components/ThemeToggle-btn';
 import TopBar from '@/src/components/topBar';
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { DateRangePicker } from "@/src/components/dateRange-picker";
-import EarningChart from "@/src/components/earnings-chart";
-import { RecentDonates } from "@/src/components/recentDonates";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/src/components/ui/card';
+import { DateRangePicker } from '@/src/components/dateRange-picker';
+import EarningChart from '@/src/components/earnings-chart';
+import { Donate, RecentDonates } from '@/src/components/recentDonates';
 import { Button } from '@/src/components/ui/button';
 import { w } from 'windstitch';
 
+interface Transaction {
+    available_on: number;
+    amount: number;
+}
+
+interface EarningsByYear {
+    year: number;
+    months: {
+        month: string;
+        earnings: number;
+    }[];
+}
+
 const Container = w('div', {
-    className: 'flex items-center space-x-6'
+    className: 'flex items-center space-x-6',
 });
 
-const Spacer = w('div', {
-    className: 'mt-10'
-});
+const Spacer = w('div', { className: 'mt-10' });
 
 const HiddenFlexCol = w('div', {
-    className: 'hidden flex-col space-y-6 p-10 pb-16 md:block'
+    className: 'hidden flex-col space-y-6 p-10 pb-16 md:block',
 });
 
-const BorderBottom = w('div', {
-    className: 'border-b'
-});
+const BorderBottom = w('div', { className: 'border-b' });
 
 const FlexItemsCenter = w('div', {
-    className: 'flex h-16 items-center px-4'
+    className: 'flex h-16 items-center px-4',
 });
 
 const FlexItemsCenterSpace = w('div', {
-    className: 'ml-auto flex items-center space-x-4'
+    className: 'ml-auto flex items-center space-x-4',
 });
 
 const Flex1SpaceY = w('div', {
-    className: 'flex-1 space-y-4 py-8 pt-6'
+    className: 'flex-1 space-y-4 py-8 pt-6',
 });
 
 const GridCols = w('div', {
-    className: 'grid gap-4 md:grid-cols-2 lg:grid-cols-4'
+    className: 'grid gap-4 md:grid-cols-2 lg:grid-cols-4',
 });
 
 const GridColsLarge = w('div', {
-    className: 'grid gap-2 md:grid-cols-2 lg:grid-cols-7'
+    className: 'grid gap-2 md:grid-cols-2 lg:grid-cols-7',
 });
 
-const GridColsSmall = w('div', {
-    className: 'grid gap-4 md:grid-cols-2 lg:grid-cols-3'
-});
+const ColSpan4 = w(Card, { className: 'col-span-4' });
 
-const ColSpan4 = w(Card, {
-    className: 'col-span-4'
-});
-
-const ColSpan3 = w(Card, {
-    className: 'col-span-3'
-});
+const ColSpan3 = w(Card, { className: 'col-span-3' });
 
 const HeaderCard = w(CardHeader, {
-    className: 'flex flex-row items-center justify-between space-y-0 pb-2'
+    className: 'flex flex-row items-center justify-between space-y-0 pb-2',
 });
 
-const TitleCard = w(CardTitle, {
-    className: 'text-sm font-medium'
-});
+const TitleCard = w(CardTitle, { className: 'text-sm font-medium' });
 
-const CardValue = w('div', {
-    className: 'text-2xl font-bold'
-});
+const CardValue = w('div', { className: 'text-2xl font-bold' });
 
 const DescriptionCard = w(CardDescription, {
-    className: 'text-xs text-muted-foreground'
+    className: 'text-xs text-muted-foreground',
 });
 
-const PageTitle = w('h1', {
-    className: 'text-2xl font-bold tracking-tight'
-});
+const PageTitle = w('h1', { className: 'text-2xl font-bold tracking-tight' });
 
-const processTransactions = (transactions: any[]) => {
+const processTransactions = (transactions: Transaction[]): EarningsByYear[] => {
     const months = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
     ];
 
-    const earningsByYear = transactions.reduce((acc, transaction) => {
-        if (transaction.reporting_category === "charge") {
-            const date = new Date(transaction.available_on * 1000);
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const amountInReais = transaction.amount / 100;
+    const earningsByYear: Record<number, Record<number, number>> = {};
 
-            if (!acc[year]) {
-                acc[year] = {};
-            }
-            if (!acc[year][month]) {
-                acc[year][month] = 0;
-            }
-            acc[year][month] += amountInReais;
+    transactions.forEach((transaction) => {
+        const date = new Date(transaction.available_on * 1000);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const amountInReais = transaction.amount / 100;
+
+        if (!earningsByYear[year]) {
+            earningsByYear[year] = {};
         }
-        return acc;
-    }, {});
+        if (!earningsByYear[year][month]) {
+            earningsByYear[year][month] = 0;
+        }
+        earningsByYear[year][month] += amountInReais;
+    });
 
-    return Object.keys(earningsByYear).map(year => ({
+    return Object.keys(earningsByYear).map((year) => ({
         year: parseInt(year),
-        months: Object.keys(earningsByYear[year]).map(month => ({
+        months: Object.keys(earningsByYear[parseInt(year)]).map((month) => ({
             month: months[parseInt(month)],
-            earnings: earningsByYear[year][month]
-        }))
+            earnings: earningsByYear[parseInt(year)][parseInt(month)],
+        })),
     }));
 };
 
-const DashboardPage = () => {
-    const [balance, setBalance] = useState({});
-    const [transactions, setTransactions] = useState<{ year: number; months: { month: string; earnings: number; }[] }[]>([]);
+const DashboardPage: React.FC = () => {
+    const [balance, setBalance] = useState<any>({});
+    const [transactions, setTransactions] = useState<EarningsByYear[]>([]);
     const [loading, setLoading] = useState(true);
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [totalDonations, setTotalDonations] = useState(0);
+    const [revenuePercentChange, setRevenuePercentChange] = useState(0);
+    const [donationsPercentChange, setDonationsPercentChange] = useState(0);
+    const [recentDonates, setRecentDonates] = useState<Donate[]>([]);
+    const [thisMonthDonationCount, setThisMonthDonationCount] = useState(0);
 
     useEffect(() => {
-        const fetchBalanceData = async () => {
-            const data = await fetchBalance();
-            setBalance(data);
-        };
-        const fetchTransactionsData = async () => {
-            const data = await fetchBalanceTransactions();
-            const processedTransactions = processTransactions(data);
+        const fetchData = async () => {
+            const [balanceData, transactionsData, donationsData] = await Promise.all([
+                fetchBalance(),
+                fetchBalanceTransactions(),
+                fetchRecentDonations(),
+            ]);
+
+            setBalance(balanceData);
+
+            const processedTransactions = processTransactions(transactionsData);
             setTransactions(processedTransactions);
+
+            let totalRevenue = 0;
+            let totalDonations = transactionsData.length;
+
+            const earningsByMonthYear: Record<
+                string,
+                { earnings: number; donations: number }
+            > = {};
+
+            transactionsData.forEach((transaction: { available_on: number; amount: number; }) => {
+                const date = new Date(transaction.available_on * 1000);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const amountInReais = transaction.amount / 100;
+
+                totalRevenue += amountInReais;
+
+                const key = `${year}-${month}`;
+                if (!earningsByMonthYear[key]) {
+                    earningsByMonthYear[key] = { earnings: 0, donations: 0 };
+                }
+                earningsByMonthYear[key].earnings += amountInReais;
+                earningsByMonthYear[key].donations += 1;
+            });
+
+            setTotalRevenue(totalRevenue);
+            setTotalDonations(totalDonations);
+
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+
+            let prevYear = currentYear;
+            let prevMonth = currentMonth - 1;
+            if (prevMonth < 0) {
+                prevMonth = 11;
+                prevYear = currentYear - 1;
+            }
+
+            const currentMonthKey = `${currentYear}-${currentMonth}`;
+            const prevMonthKey = `${prevYear}-${prevMonth}`;
+
+            const currentMonthData = earningsByMonthYear[currentMonthKey] || {
+                earnings: 0,
+                donations: 0,
+            };
+            const prevMonthData = earningsByMonthYear[prevMonthKey] || {
+                earnings: 0,
+                donations: 0,
+            };
+
+            const revenuePercentChange = prevMonthData.earnings
+                ? ((currentMonthData.earnings - prevMonthData.earnings) /
+                        prevMonthData.earnings) *
+                    100
+                : 0;
+            const donationsPercentChange = prevMonthData.donations
+                ? ((currentMonthData.donations - prevMonthData.donations) /
+                        prevMonthData.donations) *
+                    100
+                : 0;
+
+            setRevenuePercentChange(revenuePercentChange);
+            setDonationsPercentChange(donationsPercentChange);
+
+            if (donationsData) {
+                setRecentDonates(donationsData);
+
+                const thisMonthDonations = donationsData.filter((donation: Donate) => {
+                    const donationDate = new Date(donation.created_at);
+                    return (
+                        donationDate.getMonth() === currentMonth &&
+                        donationDate.getFullYear() === currentYear
+                    );
+                });
+
+                setThisMonthDonationCount(thisMonthDonations.length);
+            }
+
+            setLoading(false);
         };
 
-        Promise.all([fetchBalanceData(), fetchTransactionsData()]);
-        setLoading(false);
+        fetchData();
     }, []);
 
     if (loading) {
@@ -150,7 +252,7 @@ const DashboardPage = () => {
             <HiddenFlexCol>
                 <BorderBottom>
                     <FlexItemsCenter>
-                    <PageTitle>Dashboard</PageTitle>
+                        <PageTitle>Dashboard</PageTitle>
                         <FlexItemsCenterSpace>
                             <DateRangePicker />
                             <Button>Download</Button>
@@ -158,23 +260,45 @@ const DashboardPage = () => {
                     </FlexItemsCenter>
                 </BorderBottom>
                 <Flex1SpaceY>
-                    <GridCols>
+                <GridCols>
                         <Card>
                             <HeaderCard>
                                 <TitleCard>Total Revenue</TitleCard>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    className="h-4 w-4 text-muted-foreground"
+                                >
                                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                 </svg>
                             </HeaderCard>
                             <CardContent>
-                                <CardValue>$45,231.89</CardValue>
-                                <DescriptionCard>+20.1% from last month</DescriptionCard>
+                                <CardValue>{`R$${totalRevenue.toFixed(2)}`}</CardValue>
+                                <DescriptionCard>
+                                    {`${revenuePercentChange >= 0 ? '+' : ''}${revenuePercentChange.toFixed(
+                                        1
+                                    )}% from last month`}
+                                </DescriptionCard>
                             </CardContent>
                         </Card>
                         <Card>
                             <HeaderCard>
                                 <TitleCard>Subscriptions</TitleCard>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    className="h-4 w-4 text-muted-foreground"
+                                >
                                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                                     <circle cx="9" cy="7" r="4" />
                                     <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
@@ -188,20 +312,42 @@ const DashboardPage = () => {
                         <Card>
                             <HeaderCard>
                                 <TitleCard>Donations</TitleCard>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    className="h-4 w-4 text-muted-foreground"
+                                >
                                     <rect width="20" height="14" x="2" y="5" rx="2" />
                                     <path d="M2 10h20" />
                                 </svg>
                             </HeaderCard>
                             <CardContent>
-                                <CardValue>+12,234</CardValue>
-                                <DescriptionCard>+19% from last month</DescriptionCard>
+                                <CardValue>{totalDonations}</CardValue>
+                                <DescriptionCard>
+                                    {`${donationsPercentChange >= 0 ? '+' : ''}${donationsPercentChange.toFixed(
+                                        1
+                                    )}% from last month`}
+                                </DescriptionCard>
                             </CardContent>
                         </Card>
                         <Card>
                             <HeaderCard>
                                 <TitleCard>Active Now</TitleCard>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    className="h-4 w-4 text-muted-foreground"
+                                >
                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                                 </svg>
                             </HeaderCard>
@@ -223,10 +369,10 @@ const DashboardPage = () => {
                         <ColSpan3>
                             <CardHeader>
                                 <CardTitle>Recent Donations</CardTitle>
-                                <CardDescription>You received 265 donations this month.</CardDescription>
+                                <CardDescription>{`You received ${thisMonthDonationCount} donations this month.`}</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <RecentDonates />
+                                <RecentDonates donates={recentDonates} />
                             </CardContent>
                         </ColSpan3>
                     </GridColsLarge>

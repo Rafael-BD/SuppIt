@@ -1,53 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-interface Donate {
-    name: string;
-    email: string;
-    amount: string;
+export interface Donate {
+    id: number;
+    created_at: string;
+    amount: number;
+    donor_email: string;
+    donor_name: string;
+    comment: string;
+    creator_user: string;
+    session_id: string;
+    status: string;
 }
 
 interface RecentDonatesProps {
     donates?: Donate[];
 }
 
-const defaultDonates: Donate[] = [
-    {
-        name: 'Olivia Martin',
-        email: 'olivia.martin@email.com',
-        amount: '+$1,999.00',
-    },
-    {
-        name: 'Jackson Lee',
-        email: 'jackson.lee@email.com',
-        amount: '+$39.00',
-    },
-    {
-        name: 'Isabella Nguyen',
-        email: 'isabella.nguyen@email.com',
-        amount: '+$299.00',
-    },
-    {
-        name: 'William Kim',
-        email: 'will@email.com',
-        amount: '+$99.00',
-    },
-    {
-        name: 'Sofia Davis',
-        email: 'sofia.davis@email.com',
-        amount: '+$39.00',
-    },
-];
+export function RecentDonates({ donates }: RecentDonatesProps) {
+    const [recentDonates, setRecentDonates] = useState<Donate[]>([]);
 
-export function RecentDonates({ donates = defaultDonates }: RecentDonatesProps) {
+    useEffect(() => {
+        if (donates) {
+            setRecentDonates(donates);
+        }
+    }, [donates]);
+
     return (
         <div className="space-y-8">
-            {donates.map((donate, index) => (
-                <div key={index} className="flex items-center">
+            {recentDonates.map((donate) => (
+                <div key={donate.id} className="flex items-center">
                     <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">{donate.name}</p>
-                        <p className="text-sm text-muted-foreground">{donate.email}</p>
+                        <p className="text-sm font-medium leading-none">{donate.donor_name}</p>
+                        <p className="text-sm text-muted-foreground">{donate.donor_email}</p>
                     </div>
-                    <div className="ml-auto font-medium">{donate.amount}</div>
+                    <div className="ml-auto font-medium">
+                        {`+R$ ${(donate.amount / 100).toFixed(2)}`}
+                    </div>
                 </div>
             ))}
         </div>

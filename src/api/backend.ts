@@ -11,9 +11,9 @@ export const fetchCreatorPageData = async (creatorUser: string) => {
     }
 };
 
-export const fetchRecentDonations = async (creatorUser: string) => {
+export const fetchRecentDonations = async (creatorUser?: string) => {
     try {
-        const response = await axios.get(`${API_URL}/donations?creator_user=${creatorUser}`);
+        const response = await axios.get(`${API_URL}/donations${creatorUser ? '?creator_user=' + creatorUser : ''}`, { withCredentials: true });
         return response.data;
     } catch (error) {
         return (error as any).response;

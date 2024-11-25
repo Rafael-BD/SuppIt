@@ -81,7 +81,7 @@ const CreatorPage = () => {
     const [donorEmail, setDonorEmail] = useState('');
     const [donorComment, setDonorComment] = useState('');
     const [customSupps, setCustomSupps] = useState<string>('');
-    const [recentDonations, setRecentDonations] = useState<DonationProps[]>([]);
+    const [recentDonations, setRecentDonations] = useState<DonationProps[]>(() => []);
     const [showAllDonations, setShowAllDonations] = useState(false);
     const [isDonating, setIsDonating] = useState(false);
     const customSuppsInputRef = useRef<HTMLInputElement>(null);
@@ -250,7 +250,7 @@ const CreatorPage = () => {
                     <hr className="my-4 border-[hsl(var(--border))]" />
                     <div className="mt-4">
                         <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Recent Donations</h2>
-                        {recentDonations.slice(0, showAllDonations ? recentDonations.length : 5).map((donation) => (
+                        {recentDonations.length > 0 && recentDonations.slice(0, showAllDonations ? recentDonations.length : 5).map((donation) => (
                             <DonationItem key={donation.id}>
                                 <p><strong>{donation.donor_name}</strong> donated R$ {(donation.amount / 100).toFixed(2)}</p>
                                 <p>{donation.comment}</p>
