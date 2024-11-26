@@ -4,9 +4,14 @@ import { w } from 'windstitch';
 import { Button } from '@/src/components/ui/button';
 import { useParams } from 'next/navigation';
 import { RadioGroup } from '@/src/components/ui/radio-group';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/src/components/ui/dropdown-menu';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/src/components/ui/dropdown-menu';
 import { FaTwitter, FaInstagram, FaYoutube, FaTiktok, FaTwitch } from 'react-icons/fa';
-import { Loader2, Link } from 'lucide-react';
+import { Loader2, Link, Menu } from 'lucide-react';
 import { donate, fetchCreatorPageData, fetchRecentDonations } from '@/src/api/backend';
 import HomeButton from '@/src/components/home-btn';
 import ThemeToggleButton from '@/src/components/ThemeToggle-btn';
@@ -90,7 +95,9 @@ const CreatorPage = () => {
         const getCreatorData = async () => {
             if (creatorUser) {
                 try {
-                    const data = await fetchCreatorPageData(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
+                    const data = await fetchCreatorPageData(
+                        Array.isArray(creatorUser) ? creatorUser[0] : creatorUser
+                    );
                     if (data.name) {
                         setCreator(data);
                     } else {
@@ -108,7 +115,9 @@ const CreatorPage = () => {
         const getRecentDonations = async () => {
             if (creatorUser) {
                 try {
-                    const data = await fetchRecentDonations(Array.isArray(creatorUser) ? creatorUser[0] : creatorUser);
+                    const data = await fetchRecentDonations(
+                        Array.isArray(creatorUser) ? creatorUser[0] : creatorUser
+                    );
                     setRecentDonations(data);
                 } catch (error) {
                     console.error('Error fetching recent donations:', error);
@@ -175,28 +184,40 @@ const CreatorPage = () => {
             <Container>
                 <TopBar>
                     <HomeButton />
-                    <div className="flex items-center space-x-6">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="text-lg">...</Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => console.log('Share')}>Share</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => console.log('Report')}>Report</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                    <div className="hidden md:flex items-center space-x-6">
                         <LoginButton />
                         <ThemeToggleButton />
+                    </div>
+                    <div className="flex md:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="text-lg">
+                                    <Menu />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>
+                                    <LoginButton />
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <ThemeToggleButton />
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </TopBar>
                 <Content>
                     <Card className="flex-1 mt-14">
-                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Creator not found</h2>
-                        <p className="text-[hsl(var(--muted-foreground))]">The creator you are looking for does not exist.</p>
+                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">
+                            Creator not found
+                        </h2>
+                        <p className="text-[hsl(var(--muted-foreground))]">
+                            The creator you are looking for does not exist.
+                        </p>
                     </Card>
                 </Content>
             </Container>
-        )
+        );
     }
 
     const getSocialIcon = (social: string) => {
@@ -212,26 +233,56 @@ const CreatorPage = () => {
         <Container>
             <TopBar>
                 <HomeButton />
-                <div className="flex items-center space-x-6">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-lg">...</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => console.log('Share')}>Share</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => console.log('Report')}>Report</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                <div className="hidden md:flex items-center space-x-6">
                     <LoginButton />
                     <ThemeToggleButton />
                 </div>
+                <div className="flex md:hidden">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="text-lg">
+                                <Menu />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className='p-2 space-y-4'>
+                            <DropdownMenuItem className='justify-between'>
+                                <p className='text-md font-bold'>
+                                    Menu
+                                </p>
+                                <ThemeToggleButton />
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className='justify-end'>
+                                <LoginButton />
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </TopBar>
 
-            <Banner style={{ backgroundImage: 'url(https://via.placeholder.com/600x150)' }} />
+            <Banner
+                style={{ backgroundImage: 'url(https://via.placeholder.com/600x150)' }}
+            />
             <Content>
                 <Card className="flex-1 md:flex-[0_0_35%]">
                     <ProfileSection>
-                        <ProfileImage src="https://via.placeholder.com/150" alt="Creator Profile" />
+                        <div className="flex items-center justify-between w-full">
+                            <ProfileImage src="https://via.placeholder.com/150" alt="Creator Profile" />
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="text-lg">
+                                        ...
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => console.log('Share')}>
+                                        Share
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => console.log('Report')}>
+                                        Report
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                         <div>
                             <Title>{creator.name}</Title>
                         </div>
@@ -239,7 +290,9 @@ const CreatorPage = () => {
                     </ProfileSection>
                     <SocialLinks>
                         {creator.socials.map((social) => {
-                            const formattedSocial = social.startsWith('http') ? social : `https://${social}`;
+                            const formattedSocial = social.startsWith('http')
+                                ? social
+                                : `https://${social}`;
                             return (
                                 <SocialLink key={social} href={formattedSocial} target="_blank">
                                     {getSocialIcon(social)}
@@ -249,15 +302,28 @@ const CreatorPage = () => {
                     </SocialLinks>
                     <hr className="my-4 border-[hsl(var(--border))]" />
                     <div className="mt-4">
-                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">Recent Donations</h2>
-                        {recentDonations.length > 0 && recentDonations.slice(0, showAllDonations ? recentDonations.length : 5).map((donation) => (
-                            <DonationItem key={donation.id}>
-                                <p><strong>{donation.donor_name}</strong> donated R$ {(donation.amount / 100).toFixed(2)}</p>
-                                <p>{donation.comment}</p>
-                            </DonationItem>
-                        ))}
-                        {recentDonations.length > 5 && (
-                            <Button variant="outline" onClick={() => setShowAllDonations(!showAllDonations)}>
+                        <h2 className="font-semibold text-lg text-[hsl(var(--foreground))]">
+                            Recent Donations
+                        </h2>
+                        {recentDonations.length > 0 &&
+                            recentDonations
+                                .slice(0, showAllDonations ? recentDonations.length : window.innerWidth >= 768 ? 4 : 2)
+                                .map((donation) => (
+                                    <DonationItem key={donation.id}>
+                                        <p>
+                                            <strong>{donation.donor_name}</strong> donated R${' '}
+                                            {(donation.amount / 100).toFixed(2)}
+                                        </p>
+                                        <p>{donation.comment}</p>
+                                    </DonationItem>
+                                ))}
+                        {((window.innerWidth >= 768 && recentDonations.length > 4) || 
+                            (window.innerWidth < 768 && recentDonations.length > 2)) && (
+                            <Button
+                                className='mt-4'
+                                variant="outline"
+                                onClick={() => setShowAllDonations(!showAllDonations)}
+                            >
                                 {showAllDonations ? 'Show Less' : 'Show More'}
                             </Button>
                         )}
@@ -265,20 +331,26 @@ const CreatorPage = () => {
                 </Card>
 
                 <Card className="flex-1 md:flex-[0_0_65%]">
-                    <h2 className="font-semibold text-lg mb-4 text-[hsl(var(--foreground))]">Support {creator.name}</h2>
+                    <h2 className="font-semibold text-lg mb-4 text-[hsl(var(--foreground))]">
+                        Support {creator.name}
+                    </h2>
                     <div className="mb-4">
-                        <RadioGroup className="flex flex-wrap space-x-2" value={donationAmount.toString()} onValueChange={(value) => handleSuppChange(Number(value))}>
+                        <RadioGroup
+                            className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2"
+                            value={donationAmount.toString()}
+                            onValueChange={(value) => handleSuppChange(Number(value))}
+                        >
                             {[1, 2, 3].map((supp) => (
                                 <Button
                                     key={supp}
                                     variant={donationAmount === supp * 500 ? 'default' : 'outline'}
                                     onClick={() => handleSuppChange(supp * 500)}
-                                    className="p-4 flex-1"
+                                    className="p-4 w-full md:flex-1"
                                 >
                                     {supp}x Supps (R$ {(supp * 500 / 100).toFixed(2)})
                                 </Button>
                             ))}
-                            <div className="flex items-center space-x-2 flex-1">
+                            <div className="flex items-center space-x-2 w-full md:flex-1">
                                 <input
                                     type="number"
                                     placeholder="Custom Supps"
@@ -292,10 +364,10 @@ const CreatorPage = () => {
                                             customSuppsInputRef.current?.blur();
                                         }
                                     }}
-                                    className="p-2 border rounded bg-[hsl(var(--input))] text-[hsl(var(--foreground))] text-sm w-full"
-                                />  
-                                </div>
-                    </RadioGroup>
+                                    className="p-2 border rounded bg-[hsl(var(--background))] text-[hsl(var(--foreground))] text-sm w-full"
+                                />
+                            </div>
+                        </RadioGroup>
                     </div>
                     <input
                         type="text"
@@ -320,7 +392,11 @@ const CreatorPage = () => {
                         className="mb-4 p-2 border rounded w-full bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
                         spellCheck="false"
                     />
-                    <Button className="mt-4 w-full" onClick={handleDonate} disabled={isDonating}>
+                    <Button
+                        className="mt-4 w-full"
+                        onClick={handleDonate}
+                        disabled={isDonating}
+                    >
                         {isDonating ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

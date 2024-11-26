@@ -27,6 +27,7 @@ import {
     TabsList,
     TabsTrigger,
 } from '@/src/components/ui/tabs';
+import { Download } from 'lucide-react';
 
 interface Transaction {
     available_on: number;
@@ -48,17 +49,17 @@ const Container = w('div', {
 const Spacer = w('div', { className: 'mt-10' });
 
 const HiddenFlexCol = w('div', {
-    className: 'hidden flex-col space-y-6 p-10 pb-16 md:block',
+    className: 'flex flex-col space-y-6 p-4 md:p-10 pb-16 mt-16 md:mt-10',
 });
 
-const BorderBottom = w('div', { className: 'border-b' });
+const BorderBottom = w('div', { className: 'border-b pb-4' });
 
 const FlexItemsCenter = w('div', {
-    className: 'flex h-16 items-center px-4',
+    className: 'flex flex-col md:flex-row items-start md:items-center',
 });
 
 const FlexItemsCenterSpace = w('div', {
-    className: 'ml-auto flex items-center space-x-4',
+    className: 'flex items-center space-x-2 sm:space-x-4 mt-2 md:mt-0 md:ml-auto',
 });
 
 const Flex1SpaceY = w('div', {
@@ -66,16 +67,16 @@ const Flex1SpaceY = w('div', {
 });
 
 const GridCols = w('div', {
-    className: 'grid gap-4 md:grid-cols-2 lg:grid-cols-4',
+    className: 'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
 });
 
 const GridColsLarge = w('div', {
-    className: 'grid gap-2 md:grid-cols-2 lg:grid-cols-7',
+    className: 'grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-7',
 });
 
-const ColSpan4 = w(Card, { className: 'col-span-4' });
+const ColSpan4 = w(Card, { className: 'col-span-1 lg:col-span-4' });
 
-const ColSpan3 = w(Card, { className: 'col-span-3' });
+const ColSpan3 = w(Card, { className: 'col-span-1 lg:col-span-3' });
 
 const HeaderCard = w(CardHeader, {
     className: 'flex flex-row items-center justify-between space-y-0 pb-2',
@@ -89,7 +90,7 @@ const DescriptionCard = w(CardDescription, {
     className: 'text-xs text-muted-foreground',
 });
 
-const PageTitle = w('h1', { className: 'text-2xl font-bold tracking-tight' });
+const PageTitle = w('h1', { className: 'text-2xl font-bold tracking-tight mb-6 md:mb-0' });
 
 const processTransactions = (transactions: Transaction[]): EarningsByYear[] => {
     const months = [
@@ -261,13 +262,15 @@ const DashboardPage: React.FC = () => {
                         <PageTitle>Dashboard</PageTitle>
                         <FlexItemsCenterSpace>
                             <DateRangePicker />
-                            <Button>Download</Button>
+                            <Button size={'sm'}>
+                                <Download />
+                            </Button>
                         </FlexItemsCenterSpace>
                     </FlexItemsCenter>
                 </BorderBottom>
                 <Flex1SpaceY>
                     <Tabs defaultValue="overview" className="space-y-4">
-                        <TabsList>
+                        <TabsList >
                             <TabsTrigger value="overview">Overview</TabsTrigger>
                             <TabsTrigger value="saldo">Saldo</TabsTrigger>
                             <TabsTrigger value="beneficios">Benefícios</TabsTrigger>
@@ -408,3 +411,4 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
+
